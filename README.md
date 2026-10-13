@@ -1,6 +1,11 @@
 # 機械手臂指令小抄
 
-ROS 2 Jazzy / Gazebo Harmonic / MoveIt 專題用過的指令，照「要做什麼」分類，外加 Windows ↔ WSL 搬檔案的方法。
+ROS 2 Jazzy / Gazebo Harmonic / MoveIt 專題的複習網站：
+
+- **指令**：照「要做什麼」分類，外加 Windows ↔ WSL 搬檔案的方法
+- **程式架構**：工作區和套件的資料夾結構、launch 啟動流程、訊息怎麼流
+- **每個檔案在做什麼**：xacro、.gazebo、控制器 yaml、bridge、launch、Python node 的原理和常改的地方
+- **複製模組**：新增關節、感測器、相機、launch node、Python node 的範本
 
 **網站**：https://rekisss.github.io/bot/
 
@@ -19,7 +24,7 @@ ROS 2 Jazzy / Gazebo Harmonic / MoveIt 專題用過的指令，照「要做什�
 }
 ```
 
-`where` 可以填：`term`（Ubuntu 終端機）、`ps`（PowerShell）、`exp`（Windows 檔案總管）、`file`（VS Code 檔案）、`none`（不用指令）。
+每個分類還有 `group`（目錄分組：指令／程式架構／複製模組）。`where` 可以填：`term`（Ubuntu 終端機）、`ps`（PowerShell）、`exp`（Windows 檔案總管）、`file`（VS Code 檔案）、`none`（不用指令）。
 
 改法二選一：
 

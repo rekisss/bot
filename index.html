@@ -51,7 +51,10 @@ h1{margin:0;font-family:var(--display);font-weight:700;font-size:clamp(2rem,5vw,
 .legend{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:13px;color:var(--muted)}
 .legend span.item{display:inline-flex;gap:6px;align-items:center}
 
-.toc{display:flex;flex-wrap:wrap;gap:8px}
+.toc{display:flex;flex-direction:column;gap:10px}
+.toc-group{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}
+.toc-label{flex:none;width:5.5em;font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--muted)}
+.toc-links{display:flex;flex-wrap:wrap;gap:8px;flex:1 1 280px;min-width:0}
 .toc a{padding:5px 12px;border-radius:999px;background:var(--surface);border:1px solid var(--line);color:var(--ink);text-decoration:none;font-size:14px}
 .toc a:hover{border-color:var(--accent);color:var(--accent)}
 
@@ -174,7 +177,8 @@ html{scroll-behavior:smooth}
      ],
      "note": "conda 的 Python 會跟 ROS 打架，常見症狀是莫名其妙找不到套件。"
     }
-   ]
+   ],
+   "group": "指令"
   },
   {
    "id": "car",
@@ -247,7 +251,8 @@ html{scroll-behavior:smooth}
      ],
      "note": ""
     }
-   ]
+   ],
+   "group": "指令"
   },
   {
    "id": "arm",
@@ -315,7 +320,8 @@ html{scroll-behavior:smooth}
      ],
      "note": ""
     }
-   ]
+   ],
+   "group": "指令"
   },
   {
    "id": "moveit",
@@ -349,7 +355,8 @@ html{scroll-behavior:smooth}
      ],
      "note": "加 Box 的同時拖曳夾頭最容易閃退（exit code -11）。"
     }
-   ]
+   ],
+   "group": "指令"
   },
   {
    "id": "myarm",
@@ -370,7 +377,8 @@ html{scroll-behavior:smooth}
      ],
      "note": ""
     }
-   ]
+   ],
+   "group": "指令"
   },
   {
    "id": "files",
@@ -451,7 +459,8 @@ html{scroll-behavior:smooth}
      "blocks": [],
      "note": ""
     }
-   ]
+   ],
+   "group": "指令"
   },
   {
    "id": "rescue",
@@ -532,7 +541,8 @@ html{scroll-behavior:smooth}
      ],
      "note": ""
     }
-   ]
+   ],
+   "group": "指令"
   },
   {
    "id": "install",
@@ -566,6 +576,355 @@ html{scroll-behavior:smooth}
      ],
      "note": ""
     }
+   ],
+   "group": "指令"
+  },
+  {
+   "id": "arch",
+   "group": "程式架構",
+   "title": "程式架構總覽",
+   "ordered": false,
+   "intro": "一個 ROS 2 套件就是一個資料夾，裡面固定分成幾格抽屜。先知道每格放什麼，改東西時才知道要去哪找。",
+   "cards": [
+    {
+     "id": "c31",
+     "where": "none",
+     "title": "兩個工作區長怎樣",
+     "desc": "工作區（workspace）= 一個大資料夾，裡面的 src/ 放很多套件。colcon build 會把 src/ 編譯進 install/，ros2 launch 和 ros2 run 讀的是 install/ 裡的東西。",
+     "blocks": [
+      {
+       "label": "",
+       "code": "~/ros2_ws/                        ← 練習用工作區（MOGI 課程）\n├── src/                          ← 原始碼都在這，你只會改這裡\n│   ├── Week-5-6-Gazebo-sensors/\n│   │   ├── bme_gazebo_sensors/       ← 車子：模型、世界、launch\n│   │   └── bme_gazebo_sensors_py/    ← 車子的 Python 程式（追紅球）\n│   ├── Week-9-10-Simple-arm/\n│   │   └── bme_ros2_simple_arm/      ← 手臂：模型、控制器、launch\n│   └── mogi_trajectory_server/       ← 畫軌跡的小工具\n├── build/      ← colcon build 自動產生，不用管\n├── install/    ← colcon build 自動產生，source 的就是它\n└── log/        ← 編譯紀錄\n\n~/arm_ws/                         ← 專題自己的工作區\n└── src/\n    └── arm_description/          ← SolidWorks 轉出來的手臂\n        ├── urdf/arm.urdf\n        ├── meshes/*.stl\n        └── CMakeLists.txt"
+      }
+     ],
+     "note": "build/、install/、log/ 壞掉可以整個刪掉再 colcon build，不會弄壞你的程式。src/ 千萬不要亂刪。"
+    },
+    {
+     "id": "c32",
+     "where": "none",
+     "title": "手臂套件的抽屜（Week 9-10）",
+     "desc": "描述型的套件：裡面幾乎沒有程式，全是「描述機器人」和「設定」的檔案。",
+     "blocks": [
+      {
+       "label": "",
+       "code": "bme_ros2_simple_arm/\n├── urdf/\n│   ├── mogi_arm.xacro          ★ 手臂長怎樣：零件、關節、ros2_control、觸覺感測器\n│   ├── mogi_arm.gazebo         ★ 模擬專用的外掛：控制器插座、關節狀態\n│   └── materials.xacro           顏色表（orange、grey、blue…）\n├── config/\n│   ├── controller_position.yaml ★ 控制器清單：誰負責哪些關節\n│   └── gz_bridge.yaml          ★ 翻譯表：哪些 Gazebo 訊息要轉給 ROS\n├── launch/\n│   ├── spawn_robot.launch.py   ★ 一鍵啟動：開世界、放手臂、開控制器\n│   └── world.launch.py           只負責開 Gazebo 世界\n├── worlds/world.sdf              桌子和要夾的東西\n├── meshes/*.dae                  零件的 3D 外觀\n├── rviz/rviz.rviz                RViz 畫面要顯示什麼\n├── CMakeLists.txt                編譯時要把哪些資料夾裝進 install/\n└── package.xml                   套件名片：名字、需要哪些別的套件\n\n★ = 你最常改的檔案"
+      }
+     ],
+     "note": ""
+    },
+    {
+     "id": "c33",
+     "where": "none",
+     "title": "車子的兩個套件（Week 5-6）",
+     "desc": "ROS 習慣把「描述」和「Python 程式」拆成兩個套件，名字後面加 _py 的就是放程式的那個。",
+     "blocks": [
+      {
+       "label": "",
+       "code": "bme_gazebo_sensors/              ← 不含程式，只有「描述」\n├── urdf/\n│   ├── mogi_bot.urdf             車身、輪子、相機、IMU 裝在哪\n│   └── mogi_bot.gazebo           輪子驅動外掛、相機與 IMU 的規格\n├── launch/spawn_robot.launch.py  啟動，bridge 寫在這裡的 arguments=[...]\n├── config/ekf.yaml               EKF 融合 IMU 和輪子里程計\n└── worlds/                       世界檔\n\nbme_gazebo_sensors_py/           ← Python 程式放這\n├── bme_gazebo_sensors_py/\n│   └── chase_the_ball.py         ★ 追紅球\n├── setup.py                      ★ 註冊程式名稱（ros2 run 後面那個名字）\n└── package.xml"
+      }
+     ],
+     "note": ""
+    },
+    {
+     "id": "c34",
+     "where": "none",
+     "title": "按下 launch 之後發生什麼事",
+     "desc": "一個 launch 檔一口氣開好幾支程式，順序大致如下。哪一支沒起來，就去看對應的檔案。",
+     "blocks": [
+      {
+       "label": "",
+       "code": "ros2 launch bme_ros2_simple_arm spawn_robot.launch.py\n│\n├─ world.launch.py           開 Gazebo，載入 world.sdf（桌子、方塊、罐子）\n├─ robot_state_publisher     讀 mogi_arm.xacro → 展開成 URDF → 發出 robot_description 和 TF\n├─ ros_gz_sim create         拿 robot_description，在 Gazebo 裡生出手臂\n│    └─ 手臂身上的 gz_ros2_control 外掛啟動 controller_manager\n├─ spawner joint_state_broadcaster   開始把關節角度發到 /joint_states\n├─ spawner arm_controller            開始接收「要轉到幾度」的指令\n├─ parameter_bridge          照 gz_bridge.yaml 把 /clock、/contact_left_finger 轉給 ROS\n└─ rviz2                     顯示機器人「以為」自己長怎樣"
+      }
+     ],
+     "note": "控制器起不來，問題一定在 mogi_arm.xacro 的 ros2_control 區塊、mogi_arm.gazebo，或殭屍 Gazebo。"
+    },
+    {
+     "id": "c35",
+     "where": "none",
+     "title": "訊息怎麼流",
+     "desc": "ROS 裡每支程式各做一件事，靠 topic（有名字的管線）互傳訊息。",
+     "blocks": [
+      {
+       "label": "",
+       "code": "【控制：你 → 手臂】\nrqt 拉滑桿\n  → /arm_controller/joint_trajectory   （「2 秒內轉到這些角度」）\n  → arm_controller 在中間補出平滑路徑\n  → gz_ros2_control（command_interface: position）\n  → Gazebo 裡的關節真的轉\n\n【回報：手臂 → 你】\nGazebo 關節角度（state_interface: position / velocity / effort）\n  → joint_state_broadcaster → /joint_states\n  → robot_state_publisher 算出每個零件在哪 → TF → RViz 畫出來\n\n【觸覺】\nGazebo contact sensor（gz 的 /contact_left_finger）\n  → parameter_bridge 翻譯\n  → ROS 的 /contact_left_finger → ros2 topic echo 或你的程式"
+      }
+     ],
+     "note": "RViz 看到的是 /joint_states 算出來的結果，不是 Gazebo 本身。所以 Gazebo 卡住時 RViz 可能還在動。"
+    }
+   ]
+  },
+  {
+   "id": "files-explained",
+   "group": "程式架構",
+   "title": "每個檔案在做什麼",
+   "ordered": false,
+   "intro": "照「你會改到的機率」排。每張卡都寫了原理、常改的地方，程式碼裡的中文註解是我加的。",
+   "cards": [
+    {
+     "id": "c36",
+     "where": "file",
+     "title": "mogi_arm.xacro：手臂的設計圖",
+     "desc": "原理：機器人 = 零件（link）用關節（joint）串成一棵樹。world → base_link → shoulder → upper_arm → forearm → wrist → gripper → 兩根手指。\n\n每個 link 有三樣東西：inertial 給物理引擎算重量、collision 給物理引擎算碰撞、visual 給你看。collision 故意用圓柱、方塊這種簡單形狀，因為算得快。\n\nxacro 是「加強版 URDF」，可以用 xacro:include 把別的檔案接進來，執行時才展開成一般的 URDF。\n\n常改：關節的 limit（角度範圍）、origin（位置）、axis（轉軸），新增零件或感測器。",
+     "blocks": [
+      {
+       "label": "~/ros2_ws/src/Week-9-10-Simple-arm/bme_ros2_simple_arm/urdf/mogi_arm.xacro（一組關節 + 零件）",
+       "code": "\u003c!-- 關節：決定「怎麼動」 -->\n\u003cjoint name=\"shoulder_lift_joint\" type=\"revolute\">   \u003c!-- revolute=轉、prismatic=滑、fixed=不動 -->\n  \u003climit lower=\"-1.5708\" upper=\"1.5708\"\n         effort=\"330.0\" velocity=\"3.14\"/>            \u003c!-- 角度範圍(弧度)、最大力矩、最大速度 -->\n  \u003cparent link=\"shoulder_link\"/>                     \u003c!-- 接在誰下面 -->\n  \u003cchild link=\"upper_arm_link\"/>                     \u003c!-- 帶動誰 -->\n  \u003caxis xyz=\"0 1 0\"/>                                \u003c!-- 繞哪個軸轉：這裡是 Y 軸 -->\n  \u003corigin xyz=\"0.0 0.0 0.025\" rpy=\"0.0 0.0 0.0\"/>    \u003c!-- 關節在父零件座標的哪裡 -->\n\u003c/joint>\n\n\u003c!-- 零件：決定「長怎樣、多重」 -->\n\u003clink name=\"upper_arm_link\">\n  \u003cinertial>                                         \u003c!-- 給物理引擎：重量和慣量 -->\n    \u003cmass value=\"0.3\"/>\n    \u003corigin xyz=\"0.0 0.0 0.1\"/>                      \u003c!-- 重心位置 -->\n    \u003cinertia ixx=\"0.0012\" ixy=\"0.0\" ixz=\"0.0\" iyy=\"0.0012\" iyz=\"0.0\" izz=\"0.0004\"/>\n  \u003c/inertial>\n  \u003ccollision>                                        \u003c!-- 給物理引擎：碰撞用的簡單形狀 -->\n    \u003cgeometry>\u003ccylinder radius=\"0.05\" length=\"0.2\"/>\u003c/geometry>\n    \u003corigin xyz=\"0.0 0.0 0.1\"/>\n  \u003c/collision>\n  \u003cvisual>                                           \u003c!-- 給你看：外觀 -->\n    \u003cgeometry>\u003cmesh filename=\"package://bme_ros2_simple_arm/meshes/upper_arm.dae\"/>\u003c/geometry>\n    \u003cmaterial name=\"orange\"/>\n    \u003corigin xyz=\"0.0 0.0 0.1\"/>\n  \u003c/visual>\n\u003c/link>"
+      },
+      {
+       "label": "同一個檔案下面的 ros2_control 區塊",
+       "code": "\u003cros2_control name=\"GazeboSystem\" type=\"system\">\n  \u003chardware>\n    \u003cplugin>gz_ros2_control/GazeboSimSystem\u003c/plugin>   \u003c!-- 換實機時只改這行：換成馬達驅動 -->\n  \u003c/hardware>\n  \u003cjoint name=\"shoulder_pan_joint\">\n    \u003ccommand_interface name=\"position\">                \u003c!-- 收什麼指令：位置（角度） -->\n      \u003cparam name=\"min\">-2\u003c/param>\n      \u003cparam name=\"max\">2\u003c/param>\n    \u003c/command_interface>\n    \u003cstate_interface name=\"position\">                  \u003c!-- 回報：角度 -->\n      \u003cparam name=\"initial_value\">0.0\u003c/param>\n    \u003c/state_interface>\n    \u003cstate_interface name=\"velocity\"/>                 \u003c!-- 回報：速度 -->\n    \u003cstate_interface name=\"effort\"/>                   \u003c!-- 回報：力矩 ← 之後夾力控制要讀這個 -->\n  \u003c/joint>\n  \u003c!-- 其他關節照抄，只改 name -->\n\u003c/ros2_control>"
+      }
+     ],
+     "note": "角度單位是弧度：1.5708 = 90 度、3.14 = 180 度。xyz 單位是公尺。"
+    },
+    {
+     "id": "c37",
+     "where": "file",
+     "title": "mogi_arm.gazebo：只有模擬才需要的東西",
+     "desc": "原理：URDF 描述的是「真實世界也成立」的東西（零件、關節、感測器裝在哪）。.gazebo 檔放的是「只有 Gazebo 看得懂」的設定：外掛、感測器規格、摩擦係數。\n\n換成實機時，xacro 保留，.gazebo 換成真的硬體驅動。所以拆成兩個檔案。\n\n常改：加感測器規格、改 controller yaml 的路徑。",
+     "blocks": [
+      {
+       "label": "~/ros2_ws/src/Week-9-10-Simple-arm/bme_ros2_simple_arm/urdf/mogi_arm.gazebo",
+       "code": "\u003crobot>\n  \u003c!-- 外掛 1：把 Gazebo 關節角度發出來 -->\n  \u003cgazebo>\n    \u003cplugin filename=\"gz-sim-joint-state-publisher-system\"\n            name=\"gz::sim::systems::JointStatePublisher\">\n      \u003ctopic>joint_states\u003c/topic>\n      \u003cjoint_name>shoulder_pan_joint\u003c/joint_name>\n      \u003c!-- …每個關節一行 -->\n    \u003c/plugin>\n  \u003c/gazebo>\n\n  \u003c!-- 外掛 2：ros2_control 的插座，並指定控制器設定檔 -->\n  \u003cgazebo>\n    \u003cplugin filename=\"gz_ros2_control-system\"\n            name=\"gz_ros2_control::GazeboSimROS2ControlPlugin\">\n      \u003cparameters>$(find bme_ros2_simple_arm)/config/controller_position.yaml\u003c/parameters>\n    \u003c/plugin>\n  \u003c/gazebo>\n\u003c/robot>"
+      }
+     ],
+     "note": "這個檔案要在 mogi_arm.xacro 最上面用 xacro:include 接進來才有效，忘了接會出現 Could not contact service /controller_manager。"
+    },
+    {
+     "id": "c38",
+     "where": "file",
+     "title": "controller_position.yaml：誰負責哪些關節",
+     "desc": "原理：controller_manager 是總機，每秒跑 1000 次迴圈。底下掛兩個控制器：\n• joint_state_broadcaster：只讀不寫，把角度發到 /joint_states\n• arm_controller（JointTrajectoryController）：收「幾秒內轉到這些角度」，自己在中間補出平滑路徑再一步步送給關節\n\n常改：joints 清單（加減關節）、換控制器類型。",
+     "blocks": [
+      {
+       "label": "~/ros2_ws/src/Week-9-10-Simple-arm/bme_ros2_simple_arm/config/controller_position.yaml（你目前的版本）",
+       "code": "controller_manager:\n  ros__parameters:\n    update_rate: 1000            # 控制迴圈每秒跑 1000 次\n\n    joint_state_broadcaster:     # 只讀不寫：把關節狀態發到 /joint_states\n      type: joint_state_broadcaster/JointStateBroadcaster\n\narm_controller:\n  ros__parameters:\n    type: joint_trajectory_controller/JointTrajectoryController\n    joints:                      # 名字要跟 xacro 裡的 joint name 一字不差\n      - shoulder_pan_joint\n      - shoulder_lift_joint\n      - elbow_joint\n      - wrist_joint\n      - left_finger_joint\n      - right_finger_joint\n    command_interfaces:\n      - position\n    state_interfaces:\n      - position\n      - velocity"
+      }
+     ],
+     "note": "MOGI 課程後面會把兩根手指拆成獨立的 gripper_controller，手臂和夾爪就能分開控制。"
+    },
+    {
+     "id": "c39",
+     "where": "file",
+     "title": "gz_bridge.yaml：Gazebo 和 ROS 的翻譯表",
+     "desc": "原理：Gazebo 和 ROS 是兩套各自獨立的系統，訊息格式不同。bridge 站在中間翻譯，只翻譯你列在表上的 topic。\n\n/clock 一定要有：launch 檔設了 use_sim_time=True，ROS 的時間要跟 Gazebo 的模擬時間同步，不然控制器時間會亂掉。\n\n常改：每加一個感測器，就在最後面加一段。",
+     "blocks": [
+      {
+       "label": "~/ros2_ws/src/Week-9-10-Simple-arm/bme_ros2_simple_arm/config/gz_bridge.yaml",
+       "code": "- ros_topic_name: \"clock\"               # ROS 那邊叫什麼\n  gz_topic_name: \"clock\"                # Gazebo 那邊叫什麼\n  ros_type_name: \"rosgraph_msgs/msg/Clock\"\n  gz_type_name: \"gz.msgs.Clock\"\n  direction: \"GZ_TO_ROS\"                # 方向：Gazebo → ROS\n\n- ros_topic_name: \"/contact_left_finger\"\n  gz_topic_name: \"/contact_left_finger\"\n  ros_type_name: \"ros_gz_interfaces/msg/Contacts\"\n  gz_type_name: \"gz.msgs.Contacts\"\n  direction: \"GZ_TO_ROS\""
+      }
+     ],
+     "note": "YAML 用縮排表示層級：- 要對齊，下面四行比 - 多縮 2 格。車子（Week 5-6）的 bridge 是寫在 launch 檔裡，格式不一樣，見下面的模組。"
+    },
+    {
+     "id": "c40",
+     "where": "file",
+     "title": "spawn_robot.launch.py：一鍵啟動清單",
+     "desc": "原理：launch 檔本身不做事，它是一張「要開哪些程式」的清單。三種東西：\n① DeclareLaunchArgument：可調參數\n② Node(...)：要開的程式\n③ add_action：把上面兩種登記進清單\n\n常改：加一個 Node、改預設參數。\n\n不用改檔也能調參數，啟動時直接加 名字:=值：",
+     "blocks": [
+      {
+       "label": "一個 Node 的寫法",
+       "code": "# ① 參數：啟動時可以用 名字:=值 覆蓋\nrviz_launch_arg = DeclareLaunchArgument(\n    'rviz', default_value='true',\n    description='Open RViz'\n)\n\n# ② 一個 Node(...) = 一個要開的程式（等於幫你打一次 ros2 run）\ngz_bridge_node = Node(\n    package=\"ros_gz_bridge\",            # 哪個套件\n    executable=\"parameter_bridge\",      # 套件裡哪支程式\n    arguments=['--ros-args', '-p', f'config_file:={gz_bridge_params_path}'],\n    output=\"screen\",                    # 訊息印在終端機\n    parameters=[{'use_sim_time': LaunchConfiguration('use_sim_time')}],\n)\n\n# ③ 最後一定要登記，沒登記 = 寫了但不會開\nlaunchDescriptionObject.add_action(gz_bridge_node)"
+      },
+      {
+       "label": "啟動時覆蓋參數（終端機）",
+       "code": "ros2 launch bme_ros2_simple_arm spawn_robot.launch.py rviz:=false\nros2 launch bme_ros2_simple_arm spawn_robot.launch.py x:=0.2 y:=0.1"
+      }
+     ],
+     "note": "最常見的錯：寫了 Node 忘了 add_action，或縮排沒對齊（Python 對縮排很嚴格）。"
+    },
+    {
+     "id": "c41",
+     "where": "file",
+     "title": "CMakeLists.txt / package.xml：套件的身分證",
+     "desc": "原理：colcon build 只會把 CMakeLists.txt 裡 install(DIRECTORY …) 列出的資料夾裝進 install/。新增一個資料夾（例如 config/）沒加進來，launch 就會說找不到檔案。\n\npackage.xml 寫套件名字和依賴哪些別的套件。",
+     "blocks": [
+      {
+       "label": "CMakeLists.txt",
+       "code": "# CMakeLists.txt（ament_cmake 套件）\n# 把 urdf、meshes 資料夾裝進 install/，launch 才找得到\ninstall(DIRECTORY urdf meshes launch config\n  DESTINATION share/${PROJECT_NAME})\n\nament_package()"
+      }
+     ],
+     "note": "改完 CMakeLists.txt 一定要重新 colcon build。"
+    },
+    {
+     "id": "c42",
+     "where": "file",
+     "title": "chase_the_ball.py：看到紅色就追",
+     "desc": "原理：一個 node 同時「聽」和「說」。聽 /camera/image，處理完說 /cmd_vel。\n\n影像處理四步：只留紅色 → 找最大的紅色區塊 → 算重心 → 跟畫面正中間比。\n\n常改的參數：\n• (220, 255)：紅色門檻，太低會把橘色也當紅色\n• 20：對準的容許誤差（像素）\n• 0.2：轉彎和前進的速度",
+     "blocks": [
+      {
+       "label": "核心邏輯（節錄，中文是我加的註解）",
+       "code": "# 1. 訂閱相機：每來一張影像就呼叫 image_callback\nself.create_subscription(Image, 'camera/image', self.image_callback, 1)\n# 2. 準備發布速度指令\nself.publisher = self.create_publisher(Twist, 'cmd_vel', 10)\n\n# 3. ROS 影像 → OpenCV 陣列\nframe = self.bridge.imgmsg_to_cv2(msg, \"bgr8\")\n\n# 4. 只看紅色通道，220~255 的像素變白色，其他變黑色\nredMask = self.threshold_binary(R, (220, 255))\n\n# 5. 找最大的白色區塊，算它的重心 (cx, cy)\nc = max(contours, key=cv2.contourArea)\nM = cv2.moments(c)\ncx = int(M[\"m10\"] / M[\"m00\"])\n\n# 6. 決策：球偏左就左轉、偏右就右轉、對準了就前進\nif abs(cols/2 - cx) > 20:            # 誤差超過 20 像素\n    msg.angular.z = 0.2 if cols/2 > cx else -0.2\nelse:\n    msg.linear.x = 0.2\nself.publisher.publish(msg)"
+      }
+     ],
+     "note": "只看紅色通道分不出紅色和白色（白色的 R 值也是 255），這就是之後要換 YOLO 的原因。"
+    },
+    {
+     "id": "c43",
+     "where": "file",
+     "title": "setup.py：讓 ros2 run 找得到你的程式",
+     "desc": "原理：Python 套件裡的 .py 檔不會自動變成指令。要在 entry_points 登記「指令名 = 檔案位置:函式」，colcon build 之後 ros2 run 才叫得出來。",
+     "blocks": [
+      {
+       "label": "setup.py 裡的 entry_points",
+       "code": "entry_points={\n    'console_scripts': [\n        # 指令名字 = 套件名.檔名:函式\n        'chase_the_ball = bme_gazebo_sensors_py.chase_the_ball:main',\n    ],\n},"
+      }
+     ],
+     "note": "新增 .py 檔、改 setup.py 都要重新 colcon build。出現 No executable found 八成是這裡沒登記或打錯字。"
+    }
+   ]
+  },
+  {
+   "id": "modules",
+   "group": "複製模組",
+   "title": "常改的地方：複製模組",
+   "ordered": false,
+   "intro": "每個模組都標好要貼到哪個檔案。大寫的 NEW、LINK、PARENT、PACKAGE 是要換成你自己名字的地方。改完一律照這個順序：xacro 檢查 → 清殭屍 Gazebo → 重開 launch。",
+   "cards": [
+    {
+     "id": "c44",
+     "where": "file",
+     "title": "新增一個轉動關節",
+     "desc": "要改三個地方，名字（NEW_joint）三處要一模一樣。",
+     "blocks": [
+      {
+       "label": "① mogi_arm.xacro：接在要掛的零件後面",
+       "code": "\u003c!-- 新關節：把 NEW 換成你的名字，PARENT 換成要接在誰下面 -->\n\u003cjoint name=\"NEW_joint\" type=\"revolute\">\n  \u003climit lower=\"-1.57\" upper=\"1.57\" effort=\"50.0\" velocity=\"3.14\"/>\n  \u003cparent link=\"PARENT_link\"/>\n  \u003cchild link=\"NEW_link\"/>\n  \u003caxis xyz=\"0 1 0\"/>\n  \u003corigin xyz=\"0.0 0.0 0.1\" rpy=\"0.0 0.0 0.0\"/>\n  \u003cdynamics damping=\"0.0\" friction=\"0.0\"/>\n\u003c/joint>\n\n\u003clink name=\"NEW_link\">\n  \u003cinertial>\n    \u003cmass value=\"0.1\"/>\n    \u003corigin xyz=\"0.0 0.0 0.05\"/>\n    \u003cinertia ixx=\"0.0001\" ixy=\"0.0\" ixz=\"0.0\" iyy=\"0.0001\" iyz=\"0.0\" izz=\"0.00002\"/>\n  \u003c/inertial>\n  \u003ccollision>\n    \u003cgeometry>\u003ccylinder radius=\"0.02\" length=\"0.1\"/>\u003c/geometry>\n    \u003corigin xyz=\"0.0 0.0 0.05\"/>\n  \u003c/collision>\n  \u003cvisual>\n    \u003cgeometry>\u003ccylinder radius=\"0.02\" length=\"0.1\"/>\u003c/geometry>\n    \u003cmaterial name=\"orange\"/>\n    \u003corigin xyz=\"0.0 0.0 0.05\"/>\n  \u003c/visual>\n\u003c/link>"
+      },
+      {
+       "label": "② mogi_arm.xacro：貼進 \u003cros2_control> 區塊裡",
+       "code": "\u003cjoint name=\"NEW_joint\">\n  \u003ccommand_interface name=\"position\">\n    \u003cparam name=\"min\">-2\u003c/param>\n    \u003cparam name=\"max\">2\u003c/param>\n  \u003c/command_interface>\n  \u003cstate_interface name=\"position\">\n    \u003cparam name=\"initial_value\">0.0\u003c/param>\n  \u003c/state_interface>\n  \u003cstate_interface name=\"velocity\"/>\n  \u003cstate_interface name=\"effort\"/>\n\u003c/joint>"
+      },
+      {
+       "label": "③ controller_position.yaml：arm_controller 的 joints 清單加一行",
+       "code": "      - NEW_joint"
+      }
+     ],
+     "note": "type 換成 prismatic 就是滑動關節（像手指），這時 limit 的單位變成公尺。"
+    },
+    {
+     "id": "c45",
+     "where": "file",
+     "title": "新增一個接觸感測器",
+     "desc": "照抄左手指的做法。例如右手指：把 LINK 全部換成 right_finger。",
+     "blocks": [
+      {
+       "label": "① mogi_arm.xacro：\u003c/robot> 上一行",
+       "code": "\u003c!-- 把 LINK 換成要裝感測器的零件名，例如 right_finger -->\n\u003cgazebo reference=\"LINK\">\n  \u003csensor name=\"sensor_contact_LINK\" type=\"contact\">\n    \u003ccontact>\n      \u003ccollision>LINK_collision\u003c/collision>\n      \u003ctopic>/contact_LINK\u003c/topic>\n    \u003c/contact>\n    \u003calways_on>1\u003c/always_on>\n    \u003cupdate_rate>100\u003c/update_rate>\n  \u003c/sensor>\n\u003c/gazebo>"
+      },
+      {
+       "label": "② gz_bridge.yaml：檔案最後面",
+       "code": "\n- ros_topic_name: \"/contact_LINK\"\n  gz_topic_name: \"/contact_LINK\"\n  ros_type_name: \"ros_gz_interfaces/msg/Contacts\"\n  gz_type_name: \"gz.msgs.Contacts\"\n  direction: \"GZ_TO_ROS\""
+      },
+      {
+       "label": "③ 終端機：測試",
+       "code": "ros2 topic echo /contact_LINK"
+      }
+     ],
+     "note": "collision 名字是 Gazebo 自動取的：零件名 + _collision。沒碰到東西時 echo 安靜是正常的。"
+    },
+    {
+     "id": "c46",
+     "where": "file",
+     "title": "新增一個相機",
+     "desc": "例如裝在夾爪上看東西（MOGI Week 9-10 STEP 11 就是這樣做）。",
+     "blocks": [
+      {
+       "label": "① mogi_arm.xacro：\u003c/robot> 上一行",
+       "code": "\u003c!-- 相機裝在哪：PARENT 換成要裝的零件，xyz 調位置 -->\n\u003cjoint type=\"fixed\" name=\"NEW_camera_joint\">\n  \u003corigin xyz=\"0.0 0.0 0.0\" rpy=\"0 0 0\"/>\n  \u003cparent link=\"PARENT_link\"/>\n  \u003cchild link=\"NEW_camera_link\"/>\n\u003c/joint>\n\u003clink name=\"NEW_camera_link\">\n  \u003cinertial>\n    \u003cmass value=\"1.0e-03\"/>\n    \u003corigin xyz=\"0 0 0\"/>\n    \u003cinertia ixx=\"1e-6\" ixy=\"0\" ixz=\"0\" iyy=\"1e-6\" iyz=\"0\" izz=\"1e-6\"/>\n  \u003c/inertial>\n  \u003cvisual>\n    \u003cgeometry>\u003cbox size=\".02 .02 .02\"/>\u003c/geometry>\n    \u003cmaterial name=\"red\"/>\n  \u003c/visual>\n\u003c/link>\n\n\u003c!-- 影像座標系：Z 朝前、X 朝右、Y 朝下（固定照抄） -->\n\u003cjoint type=\"fixed\" name=\"NEW_camera_optical_joint\">\n  \u003corigin xyz=\"0 0 0\" rpy=\"-1.5707 0 -1.5707\"/>\n  \u003cparent link=\"NEW_camera_link\"/>\n  \u003cchild link=\"NEW_camera_link_optical\"/>\n\u003c/joint>\n\u003clink name=\"NEW_camera_link_optical\"/>\n\n\u003c!-- 相機規格（只在模擬有效） -->\n\u003cgazebo reference=\"NEW_camera_link\">\n  \u003csensor name=\"camera\" type=\"camera\">\n    \u003ccamera>\n      \u003chorizontal_fov>1.3962634\u003c/horizontal_fov>     \u003c!-- 視角 80 度 -->\n      \u003cimage>\u003cwidth>640\u003c/width>\u003cheight>480\u003c/height>\u003cformat>R8G8B8\u003c/format>\u003c/image>\n      \u003cclip>\u003cnear>0.1\u003c/near>\u003cfar>15\u003c/far>\u003c/clip>\n      \u003coptical_frame_id>NEW_camera_link_optical\u003c/optical_frame_id>\n      \u003ccamera_info_topic>NEW_camera/camera_info\u003c/camera_info_topic>\n    \u003c/camera>\n    \u003calways_on>1\u003c/always_on>\n    \u003cupdate_rate>20\u003c/update_rate>                     \u003c!-- 每秒幾張 -->\n    \u003cvisualize>true\u003c/visualize>\n    \u003ctopic>NEW_camera/image\u003c/topic>\n  \u003c/sensor>\n\u003c/gazebo>"
+      },
+      {
+       "label": "② gz_bridge.yaml：檔案最後面",
+       "code": "\n- ros_topic_name: \"NEW_camera/camera_info\"\n  gz_topic_name: \"NEW_camera/camera_info\"\n  ros_type_name: \"sensor_msgs/msg/CameraInfo\"\n  gz_type_name: \"gz.msgs.CameraInfo\"\n  direction: \"GZ_TO_ROS\"\n\n- ros_topic_name: \"NEW_camera/image\"\n  gz_topic_name: \"NEW_camera/image\"\n  ros_type_name: \"sensor_msgs/msg/Image\"\n  gz_type_name: \"gz.msgs.Image\"\n  direction: \"GZ_TO_ROS\""
+      },
+      {
+       "label": "③ 終端機：看畫面",
+       "code": "ros2 run rqt_image_view rqt_image_view"
+      }
+     ],
+     "note": "MOGI 原版的影像是用 image_bridge 傳（會自動壓縮），這裡用 yaml 直接傳比較簡單，畫面一樣看得到。"
+    },
+    {
+     "id": "c47",
+     "where": "file",
+     "title": "bridge 的另一種寫法（車子用的）",
+     "desc": "Week 5-6 的 bridge 不是 yaml，是寫在 launch 檔裡的字串。看到這種格式時對照這張。",
+     "blocks": [
+      {
+       "label": "spawn_robot.launch.py 的 gz_bridge_node → arguments",
+       "code": "# 寫在 launch 檔 parameter_bridge 的 arguments=[...] 裡，一行一個\n# 格式：/topic名@ROS型別 符號 Gazebo型別\n#   [  = Gazebo → ROS（感測器資料）\n#   ]  = ROS → Gazebo（下指令）\n#   @  = 雙向\n\"/imu@sensor_msgs/msg/Imu[gz.msgs.IMU\",\n\"/cmd_vel@geometry_msgs/msg/Twist@gz.msgs.Twist\","
+      }
+     ],
+     "note": "兩種寫法擇一就好。topic 只在 Gazebo 有、ROS 沒有，就是這裡漏了。"
+    },
+    {
+     "id": "c48",
+     "where": "file",
+     "title": "launch 檔加開一支程式",
+     "desc": "想要 launch 時順便開你自己的 node。",
+     "blocks": [
+      {
+       "label": "① 貼在其他 Node(...) 旁邊，縮排對齊",
+       "code": "my_node = Node(\n    package='PACKAGE',\n    executable='PROGRAM',\n    output='screen',\n    parameters=[{'use_sim_time': LaunchConfiguration('use_sim_time')}],\n)"
+      },
+      {
+       "label": "② 貼在檔案最下面那堆 add_action 裡",
+       "code": "    launchDescriptionObject.add_action(my_node)"
+      }
+     ],
+     "note": "PACKAGE 和 PROGRAM 就是你平常 ros2 run 後面打的那兩個字。"
+    },
+    {
+     "id": "c49",
+     "where": "file",
+     "title": "Python node 範本：聽觸覺感測器",
+     "desc": "第 7 階段力控的起點：手指一碰到東西就印出碰到誰。\n放進你自己的 Python 套件，例如 ~/arm_ws/src/my_arm/my_arm/contact_watcher.py。",
+     "blocks": [
+      {
+       "label": "① contact_watcher.py",
+       "code": "import rclpy\nfrom rclpy.node import Node\nfrom ros_gz_interfaces.msg import Contacts\n\n\nclass ContactWatcher(Node):\n    def __init__(self):\n        super().__init__('contact_watcher')                  # node 名字\n        self.create_subscription(\n            Contacts, '/contact_left_finger', self.callback, 10)\n\n    def callback(self, msg):\n        for c in msg.contacts:\n            other = c.collision2.name                         # 碰到誰\n            self.get_logger().info(f'左手指碰到：{other}')\n\n\ndef main():\n    rclpy.init()\n    rclpy.spin(ContactWatcher())\n    rclpy.shutdown()"
+      },
+      {
+       "label": "② setup.py 的 console_scripts 加一行",
+       "code": "        'contact_watcher = my_arm.contact_watcher:main',"
+      },
+      {
+       "label": "③ package.xml 加依賴（放在其他 \u003cdepend> 旁邊）",
+       "code": "  \u003cdepend>ros_gz_interfaces\u003c/depend>"
+      },
+      {
+       "label": "④ 編譯並執行",
+       "code": "cd ~/arm_ws\ncolcon build --symlink-install\nsource install/setup.bash\nros2 run my_arm contact_watcher"
+      }
+     ],
+     "note": "這個範本還沒在你電腦上跑過。如果 collision2 的欄位名稱不對，先用 ros2 topic echo /contact_left_finger 看實際的欄位再改。"
+    },
+    {
+     "id": "c50",
+     "where": "file",
+     "title": "Python node 範本：同時聽和說",
+     "desc": "通用骨架：一個 node 同時有 publisher、subscriber 和 timer。之後寫任何 node 都從這裡改。",
+     "blocks": [
+      {
+       "label": "my_node.py",
+       "code": "import rclpy\nfrom rclpy.node import Node\nfrom std_msgs.msg import String\n\n\nclass MyNode(Node):\n    def __init__(self):\n        super().__init__('my_node')\n        self.pub = self.create_publisher(String, 'my_topic', 10)   # 要發的 topic\n        self.create_subscription(String, 'other_topic', self.on_msg, 10)  # 要聽的 topic\n        self.create_timer(0.5, self.tick)                          # 每 0.5 秒呼叫 tick\n\n    def on_msg(self, msg):\n        self.get_logger().info(f'收到：{msg.data}')\n\n    def tick(self):\n        out = String()\n        out.data = 'hello'\n        self.pub.publish(out)\n\n\ndef main():\n    rclpy.init()\n    rclpy.spin(MyNode())\n    rclpy.shutdown()"
+      }
+     ],
+     "note": "記得到 setup.py 登記，再 colcon build。"
+    },
+    {
+     "id": "c51",
+     "where": "term",
+     "title": "不用滑桿，直接下指令轉關節",
+     "desc": "用一行指令叫手臂 2 秒內轉到指定角度。這就是 rqt 控制面板背後在做的事，之後的 IK 程式也是發這個訊息。",
+     "blocks": [
+      {
+       "label": "手臂模擬開著的時候貼",
+       "code": "ros2 topic pub --once /arm_controller/joint_trajectory trajectory_msgs/msg/JointTrajectory \"{joint_names: [shoulder_pan_joint, shoulder_lift_joint, elbow_joint, wrist_joint, left_finger_joint, right_finger_joint], points: [{positions: [0.5, 0.3, 0.8, 0.4, 0.04, 0.04], time_from_start: {sec: 2}}]}\""
+      }
+     ],
+     "note": "joint_names 要跟 controller_position.yaml 的 joints 清單完全一樣（數量和順序），positions 的數字一一對應，單位是弧度（手指是公尺）。"
+    }
    ]
   }
  ]
@@ -598,7 +957,7 @@ html{scroll-behavior:smooth}
     top.innerHTML =
       '<p class="eyebrow">機械手臂專題 · WSL2 Ubuntu 24.04 · ROS 2 Jazzy</p>' +
       '<h1>機械手臂指令小抄</h1>' +
-      '<p class="lede">目前用過的指令，照「要做什麼」分好類。每張卡片右上角的顏色告訴你要貼到哪裡。用「複製」按鈕再貼上，就不會把 rekis@…$ 一起貼進去。</p>' +
+      '<p class="lede">用過的指令、程式架構和每個檔案的原理，加上改程式時可以直接複製的模組。每張卡片右上角的顏色告訴你要貼到哪裡。用「複製」按鈕再貼上，就不會把 rekis@…$ 一起貼進去。</p>' +
       '<div class="tools"><input id="q" type="search" placeholder="搜尋，例如 teleop、gz、explorer、手臂" aria-label="搜尋指令">' +
       '<button id="edit-toggle" class="btn" type="button">編輯內容</button></div>' +
       '<div class="legend">' + PLACES.map(function(p){ return '<span class="item"><span class="where w-'+p[0]+'">'+esc(p[1])+'</span>'+esc(p[2])+'</span>'; }).join('') + '</div>';
@@ -649,6 +1008,7 @@ html{scroll-behavior:smooth}
     var id = esc(s.id);
     return '<div class="sec-edit" data-s="'+si+'">' +
       '<div class="ed-row"><label for="st-'+id+'" style="font-size:12px;color:var(--muted);font-weight:700">分類名稱</label><input id="st-'+id+'" data-sf="title" value="'+esc(s.title)+'"></div>' +
+      '<div class="ed-row"><label for="sg-'+id+'" style="font-size:12px;color:var(--muted);font-weight:700">放在目錄的哪一組（指令／程式架構／複製模組，或自己取名）</label><input id="sg-'+id+'" data-sf="group" value="'+esc(s.group)+'"></div>' +
       '<div class="ed-row"><label for="si-'+id+'" style="font-size:12px;color:var(--muted);font-weight:700">分類說明</label><textarea id="si-'+id+'" data-sf="intro" rows="2">'+esc(s.intro)+'</textarea></div>' +
       '<div class="row"><label><input type="checkbox" id="so-'+id+'" data-sf="ordered"'+(s.ordered?' checked':'')+'> 卡片有先後順序（顯示步驟編號）</label>' +
       '<button class="mini danger" type="button" data-act="del-sec">刪除整個分類</button></div></div>';
@@ -659,7 +1019,17 @@ html{scroll-behavior:smooth}
     if (q) q.disabled = editing;
     var t = document.getElementById('edit-toggle');
     if (t) { t.textContent = editing ? '完成編輯' : '編輯內容'; t.classList.toggle('on', editing); }
-    var html = '<nav class="toc" aria-label="分類">' + state.sections.map(function(s){ return '<a href="#'+esc(s.id)+'">'+esc(s.title)+'</a>'; }).join('') + '</nav>';
+    var groups = [];
+    state.sections.forEach(function(s){
+      var g = s.group || '其他', found = null;
+      for (var i=0;i<groups.length;i++) if (groups[i].name === g) found = groups[i];
+      if (!found) { found = { name: g, items: [] }; groups.push(found); }
+      found.items.push(s);
+    });
+    var html = '<nav class="toc" aria-label="分類">' + groups.map(function(g){
+      return '<div class="toc-group"><span class="toc-label">'+esc(g.name)+'</span><div class="toc-links">' +
+        g.items.map(function(s){ return '<a href="#'+esc(s.id)+'">'+esc(s.title)+'</a>'; }).join('') + '</div></div>';
+    }).join('') + '</nav>';
     var shown = 0;
     state.sections.forEach(function(s, si){
       var list = [];
