@@ -1,0 +1,821 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>body{margin:0}[hidden]{display:none!important}img{max-width:100%}/* GitHub 版是靜態網頁：在頁面上改的內容存不回來，所以隱藏編輯按鈕。要改請改這個檔案的 data 區塊。 */#edit-toggle{display:none!important}</style>
+<title>機械手臂指令小抄</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap"><style id="page-css">
+/* 版面：單欄長頁，上方是搜尋和分類目錄，每個指令一張卡；程式碼區塊永遠是深色終端機，右上角顏色標籤說「貼到哪裡」 */
+:root{
+  --bg:#edf1ef; --surface:#fafcfb; --ink:#17201c; --muted:#56645d; --line:#d2dbd6;
+  --accent:#0d6b6e; --accent-ink:#ffffff; --accent-soft:#d6eae9;
+  --code-bg:#18211e; --code-fg:#dfeae4; --code-dim:#8a9b93;
+  --term:#2b3933; --term-ink:#e9f1ec; --ps:#dbe5fb; --ps-ink:#22449c;
+  --exp:#f6e6c9; --exp-ink:#784805; --file:#e7defa; --file-ink:#523596; --none:#e1e7e4; --none-ink:#46534d;
+  --warn:#b2451a; --warn-soft:#fbe4d8; --bar-bg:#17201c; --bar-fg:#edf1ef;
+  --display:"LXGW WenKai TC","Noto Serif TC","PingFang TC",serif;
+  --body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,"Noto Sans TC",monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#101614; --surface:#18201d; --ink:#e2eae5; --muted:#99a8a1; --line:#2b3632;
+  --accent:#5ec3c1; --accent-ink:#06201f; --accent-soft:#1c3533;
+  --code-bg:#0a0f0d; --code-fg:#dfeae4; --code-dim:#71837b;
+  --term:#d6e2db; --term-ink:#15201b; --ps:#1f2c4d; --ps-ink:#abc3ff;
+  --exp:#3a2c12; --exp-ink:#f2c77b; --file:#2c2346; --file-ink:#cdb9ff; --none:#25302c; --none-ink:#a9b6b0;
+  --warn:#ff9c72; --warn-soft:#3a2017; --bar-bg:#e2eae5; --bar-fg:#101614; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#101614; --surface:#18201d; --ink:#e2eae5; --muted:#99a8a1; --line:#2b3632;
+  --accent:#5ec3c1; --accent-ink:#06201f; --accent-soft:#1c3533;
+  --code-bg:#0a0f0d; --code-fg:#dfeae4; --code-dim:#71837b;
+  --term:#d6e2db; --term-ink:#15201b; --ps:#1f2c4d; --ps-ink:#abc3ff;
+  --exp:#3a2c12; --exp-ink:#f2c77b; --file:#2c2346; --file-ink:#cdb9ff; --none:#25302c; --none-ink:#a9b6b0;
+  --warn:#ff9c72; --warn-soft:#3a2017; --bar-bg:#e2eae5; --bar-fg:#101614; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.65}
+.wrap{max-width:1100px;margin:0 auto;padding-inline:16px;padding-block:32px 140px;display:flex;flex-direction:column;gap:40px}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.top{display:flex;flex-direction:column;gap:14px}
+.eyebrow{margin:0;font-size:12px;letter-spacing:.08em;color:var(--muted);font-family:var(--mono)}
+h1{margin:0;font-family:var(--display);font-weight:700;font-size:clamp(2rem,5vw,2.9rem);line-height:1.15;text-wrap:balance}
+.lede{margin:0;max-width:62ch;color:var(--muted)}
+.tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+#q{flex:1 1 260px;min-width:0;padding:10px 14px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+#q:disabled{opacity:.5}
+.btn{padding:10px 18px;border-radius:8px;border:1px solid var(--accent);background:transparent;color:var(--accent);font-weight:700;cursor:pointer}
+.btn.on{background:var(--accent);color:var(--accent-ink)}
+.legend{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:13px;color:var(--muted)}
+.legend span.item{display:inline-flex;gap:6px;align-items:center}
+
+.toc{display:flex;flex-wrap:wrap;gap:8px}
+.toc a{padding:5px 12px;border-radius:999px;background:var(--surface);border:1px solid var(--line);color:var(--ink);text-decoration:none;font-size:14px}
+.toc a:hover{border-color:var(--accent);color:var(--accent)}
+
+.sec{display:flex;flex-direction:column;gap:14px;scroll-margin-top:16px}
+.sec-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:8px}
+h2{margin:0;font-family:var(--display);font-weight:700;font-size:1.6rem;line-height:1.25;text-wrap:balance}
+.count{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.intro{margin:0;color:var(--muted);max-width:65ch}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,420px),1fr));gap:14px;align-items:start}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.card-top{display:flex;align-items:flex-start;gap:10px}
+.card-top h3{margin:0;flex:1;min-width:0;font-size:1.05rem;line-height:1.4;font-weight:700}
+.step{flex:none;width:26px;height:26px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums}
+.where{flex:none;font-size:12px;font-weight:700;padding:3px 9px;border-radius:5px;white-space:nowrap;letter-spacing:.02em}
+.w-term{background:var(--term);color:var(--term-ink)}
+.w-ps{background:var(--ps);color:var(--ps-ink)}
+.w-exp{background:var(--exp);color:var(--exp-ink)}
+.w-file{background:var(--file);color:var(--file-ink)}
+.w-none{background:var(--none);color:var(--none-ink)}
+.desc{margin:0;white-space:pre-line}
+.block{display:flex;flex-direction:column;gap:4px;min-width:0}
+.block-label{font-size:12px;color:var(--muted);font-family:var(--mono)}
+.code-wrap{position:relative;min-width:0}
+pre{margin:0;background:var(--code-bg);color:var(--code-fg);border-radius:8px;padding:12px 74px 12px 14px;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.65;white-space:pre}
+.copy{position:absolute;top:7px;right:7px;padding:3px 10px;border-radius:5px;border:1px solid var(--code-dim);background:transparent;color:var(--code-fg);font-size:12px;cursor:pointer}
+.copy:hover{border-color:var(--code-fg)}
+.copy.done{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.note{margin:0;font-size:13.5px;color:var(--muted);white-space:pre-line}
+.note b{color:var(--warn);margin-right:6px;font-weight:700}
+.empty{color:var(--muted)}
+.foot{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+
+/* 編輯模式 */
+.editing{gap:12px;border-style:dashed;border-color:var(--accent)}
+.ed-row{display:flex;flex-direction:column;gap:4px}
+.ed-row label,.ed-block legend{font-size:12px;color:var(--muted);font-weight:700}
+.editing input:not([type=checkbox]),.editing select,.editing textarea,.sec-edit input:not([type=checkbox]),.sec-edit textarea{width:100%;padding:7px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg)}
+textarea{resize:vertical}
+textarea.mono{font-family:var(--mono);font-size:13px;line-height:1.55;white-space:pre;overflow-x:auto}
+.ed-block{border:1px solid var(--line);border-radius:8px;padding:8px 10px 10px;margin:0;display:flex;flex-direction:column;gap:6px;min-width:0}
+.ed-actions{display:flex;gap:8px;flex-wrap:wrap}
+.mini{padding:5px 11px;border-radius:6px;border:1px solid var(--line);background:var(--surface);font-size:13px;cursor:pointer;align-self:flex-start}
+.mini:disabled{opacity:.4;cursor:default}
+.mini.danger{color:var(--warn);border-color:var(--warn)}
+.mini.danger.armed{background:var(--warn);color:var(--surface)}
+.sec-edit{display:flex;flex-direction:column;gap:8px;border-bottom:1px solid var(--line);padding-bottom:12px}
+.sec-edit .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;font-size:13px;color:var(--muted)}
+.add-card,.add-sec{padding:16px;border:1px dashed var(--accent);border-radius:10px;background:transparent;color:var(--accent);font-weight:700;cursor:pointer}
+
+#bar{position:fixed;left:0;right:0;bottom:0;background:var(--bar-bg);color:var(--bar-fg);padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;z-index:10}
+#bar .msg{font-size:14px;min-width:0;flex:1 1 240px}
+#bar .acts{display:flex;gap:8px;flex-wrap:wrap}
+#bar button{padding:8px 16px;border-radius:7px;border:1px solid var(--bar-fg);background:transparent;color:var(--bar-fg);font-weight:700;cursor:pointer}
+#bar button.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+#bar button:disabled{opacity:.45;cursor:default}
+@media (prefers-reduced-motion: reduce){*{scroll-behavior:auto!important;transition:none!important}}
+html{scroll-behavior:smooth}
+</style>
+</head>
+<body>
+<div class="wrap"><header class="top" id="top"></header><main id="content" class="wrap-inner" style="display:flex;flex-direction:column;gap:44px"></main></div><div id="bar" hidden></div><script type="application/json" id="data">{
+ "updated": "2026-10-13",
+ "sections": [
+  {
+   "id": "start",
+   "title": "每次開工",
+   "ordered": true,
+   "intro": "不管今天要玩車子還是手臂，先照這四步把環境準備好。",
+   "cards": [
+    {
+     "id": "c1",
+     "where": "ps",
+     "title": "打開 Ubuntu",
+     "desc": "開始選單直接搜尋「Ubuntu 24.04 LTS」點開也可以。注意不要開到 26.04 那個。",
+     "blocks": [
+      {
+       "label": "",
+       "code": "wsl -d Ubuntu-24.04"
+      }
+     ],
+     "note": "看到 rekis@DESKTOP-OOFM2EI:~$ 就代表進到 Linux 了。"
+    },
+    {
+     "id": "c2",
+     "where": "term",
+     "title": "載入 ROS 環境",
+     "desc": "告訴這個終端機 ROS 在哪、你的套件在哪。",
+     "blocks": [
+      {
+       "label": "",
+       "code": "source /opt/ros/jazzy/setup.bash\ncd ~/ros2_ws\nsource install/setup.bash"
+      }
+     ],
+     "note": "每開一個新的終端機都要做。第一行如果已經寫進 ~/.bashrc 就可以省略。"
+    },
+    {
+     "id": "c3",
+     "where": "term",
+     "title": "有改程式就重新編譯",
+     "desc": "新增檔案、改 setup.py 之後一定要做。",
+     "blocks": [
+      {
+       "label": "",
+       "code": "cd ~/ros2_ws\ncolcon build --symlink-install\nsource install/setup.bash"
+      }
+     ],
+     "note": "只改 URDF 或 launch 檔不用編譯，但一定要 Ctrl+C 關掉再重開 launch。"
+    },
+    {
+     "id": "c4",
+     "where": "term",
+     "title": "跑 ROS 前先離開 conda",
+     "desc": "提示字元前面出現 (base) 或 (lerobot) 時才需要。",
+     "blocks": [
+      {
+       "label": "",
+       "code": "conda deactivate"
+      }
+     ],
+     "note": "conda 的 Python 會跟 ROS 打架，常見症狀是莫名其妙找不到套件。"
+    }
+   ]
+  },
+  {
+   "id": "car",
+   "title": "小車模擬（Week 5-6）",
+   "ordered": false,
+   "intro": "開車、看相機、追紅球。每個程式各開一個終端機。",
+   "cards": [
+    {
+     "id": "c5",
+     "where": "term",
+     "title": "開模擬",
+     "desc": "會同時打開 Gazebo（真實世界）和 RViz（機器人以為的世界）。",
+     "blocks": [
+      {
+       "label": "終端機 1",
+       "code": "ros2 launch bme_gazebo_sensors spawn_robot.launch.py"
+      }
+     ],
+     "note": ""
+    },
+    {
+     "id": "c6",
+     "where": "term",
+     "title": "鍵盤開車（控制器）",
+     "desc": "按鍵：i 前進、, 後退、j / l 原地轉、u / o 邊走邊轉、k 停、q / z 加速減速。",
+     "blocks": [
+      {
+       "label": "終端機 2",
+       "code": "ros2 run teleop_twist_keyboard teleop_twist_keyboard"
+      }
+     ],
+     "note": "要先點一下 teleop 那個視窗再按鍵。跟追紅球不能同時開，兩個都在發 /cmd_vel，車子會抽搐。"
+    },
+    {
+     "id": "c7",
+     "where": "term",
+     "title": "自動追紅球",
+     "desc": "OpenCV 視窗會顯示紅色遮罩、輪廓和十字準星，車子會自己轉過去追。",
+     "blocks": [
+      {
+       "label": "終端機 2",
+       "code": "ros2 run bme_gazebo_sensors_py chase_the_ball"
+      }
+     ],
+     "note": "在 OpenCV 視窗按 q 結束。先把 teleop 用 Ctrl+C 關掉。"
+    },
+    {
+     "id": "c8",
+     "where": "term",
+     "title": "生一顆紅球",
+     "desc": "模擬開著的時候貼這行，球會出現在車子正前方 1.5 公尺。",
+     "blocks": [
+      {
+       "label": "",
+       "code": "ros2 run ros_gz_sim create -name red_ball -x 2.5 -y 0.0 -z 0.3 -string '\u003csdf version=\"1.9\">\u003cmodel name=\"red_ball\">\u003clink name=\"link\">\u003cinertial>\u003cmass>0.5\u003c/mass>\u003cinertia>\u003cixx>0.002\u003c/ixx>\u003ciyy>0.002\u003c/iyy>\u003cizz>0.002\u003c/izz>\u003c/inertia>\u003c/inertial>\u003ccollision name=\"c\">\u003cgeometry>\u003csphere>\u003cradius>0.1\u003c/radius>\u003c/sphere>\u003c/geometry>\u003c/collision>\u003cvisual name=\"v\">\u003cgeometry>\u003csphere>\u003cradius>0.1\u003c/radius>\u003c/sphere>\u003c/geometry>\u003cmaterial>\u003cambient>1 0 0 1\u003c/ambient>\u003cdiffuse>1 0 0 1\u003c/diffuse>\u003cemissive>0.6 0 0 1\u003c/emissive>\u003c/material>\u003c/visual>\u003c/link>\u003c/model>\u003c/sdf>'"
+      }
+     ],
+     "note": "想多放幾顆就改 -name（不能重複）和 -x -y 座標。看到 Entity creation successful 就成功了。"
+    },
+    {
+     "id": "c9",
+     "where": "term",
+     "title": "看相機畫面",
+     "desc": "跳出視窗後，左上角下拉選 /camera/image。",
+     "blocks": [
+      {
+       "label": "",
+       "code": "ros2 run rqt_image_view rqt_image_view"
+      }
+     ],
+     "note": ""
+    }
+   ]
+  },
+  {
+   "id": "arm",
+   "title": "手臂模擬（Week 9-10）",
+   "ordered": false,
+   "intro": "開手臂、叫出控制面板、看手指有沒有碰到東西。",
+   "cards": [
+    {
+     "id": "c10",
+     "where": "term",
+     "title": "開手臂模擬",
+     "desc": "啟動訊息裡要找到這兩行才算成功：Configured and activated arm_controller、Configured and activated joint_state_broadcaster。",
+     "blocks": [
+      {
+       "label": "終端機 1",
+       "code": "ros2 launch bme_ros2_simple_arm spawn_robot.launch.py"
+      }
+     ],
+     "note": "沒出現的話先看下面「卡住時」的殭屍 Gazebo。"
+    },
+    {
+     "id": "c11",
+     "where": "term",
+     "title": "關節控制面板（控制器）",
+     "desc": "1. controller manager 選 /controller_manager\n2. controller 選 arm_controller\n3. 按中間的紅色電源鈕變綠\n4. 拉滑桿，Gazebo 裡的手臂就會動",
+     "blocks": [
+      {
+       "label": "終端機 2",
+       "code": "ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller --force-discover"
+      }
+     ],
+     "note": "--force-discover 只有第一次需要，之後可以拿掉。"
+    },
+    {
+     "id": "c12",
+     "where": "none",
+     "title": "夾東西的順序",
+     "desc": "1. 兩根 finger 拉到 0.04 張開\n2. shoulder_pan 轉向物體\n3. shoulder_lift 往前、elbow 往下，伸過去\n4. wrist 讓夾爪對準物體\n5. 兩根 finger 慢慢往 0 拉，碰到就停\n6. shoulder_lift 往回拉，舉起來",
+     "blocks": [],
+     "note": "一次只動一個滑桿。Gazebo 用滾輪放大、右鍵拖曳換角度，從側面看比較好抓高度。"
+    },
+    {
+     "id": "c13",
+     "where": "term",
+     "title": "看左手指的觸覺",
+     "desc": "手指碰到東西時，終端機會一直印出接觸資料。",
+     "blocks": [
+      {
+       "label": "",
+       "code": "ros2 topic echo /contact_left_finger"
+      }
+     ],
+     "note": "沒碰到任何東西時安靜是正常的。"
+    },
+    {
+     "id": "c14",
+     "where": "term",
+     "title": "查控制器有沒有上線",
+     "desc": "三個都顯示 active 才正常。",
+     "blocks": [
+      {
+       "label": "",
+       "code": "ros2 control list_controllers"
+      }
+     ],
+     "note": ""
+    }
+   ]
+  },
+  {
+   "id": "moveit",
+   "title": "MoveIt 示範（Panda 手臂）",
+   "ordered": false,
+   "intro": "官方的 Panda 手臂，用來練習在 RViz 裡規劃路徑。",
+   "cards": [
+    {
+     "id": "c15",
+     "where": "term",
+     "title": "開 Panda demo",
+     "desc": "RViz 裡 Goal State 選 \u003crandom valid> → 按 Plan → 按 Execute。",
+     "blocks": [
+      {
+       "label": "",
+       "code": "ros2 launch moveit_resources_panda_moveit_config demo.launch.py"
+      }
+     ],
+     "note": "Scene Objects 分頁可以加一個 Box 擋路，看它會不會繞過去。"
+    },
+    {
+     "id": "c16",
+     "where": "term",
+     "title": "RViz 閃退時",
+     "desc": "改用軟體算圖，會慢一點但穩很多。",
+     "blocks": [
+      {
+       "label": "",
+       "code": "export LIBGL_ALWAYS_SOFTWARE=1\nros2 launch moveit_resources_panda_moveit_config demo.launch.py"
+      }
+     ],
+     "note": "加 Box 的同時拖曳夾頭最容易閃退（exit code -11）。"
+    }
+   ]
+  },
+  {
+   "id": "myarm",
+   "title": "自己的手臂（arm_description）",
+   "ordered": false,
+   "intro": "從 SolidWorks 轉出來的模型，放在 ~/arm_ws。",
+   "cards": [
+    {
+     "id": "c17",
+     "where": "term",
+     "title": "在 RViz 看自己的手臂",
+     "desc": "會跳出 RViz 和一個滑桿視窗，可以拉每個關節看轉軸對不對。",
+     "blocks": [
+      {
+       "label": "",
+       "code": "cd ~/arm_ws\ncolcon build --symlink-install\nsource install/setup.bash\nros2 launch urdf_tutorial display.launch.py model:=$(ros2 pkg prefix arm_description)/share/arm_description/urdf/arm.urdf"
+      }
+     ],
+     "note": ""
+    }
+   ]
+  },
+  {
+   "id": "files",
+   "title": "把電腦的檔案搬進 WSL",
+   "ordered": false,
+   "intro": "WSL 就是電腦裡的另一台 Linux。Windows 的檔案總管看得到它，所以可以直接拖曳。",
+   "cards": [
+    {
+     "id": "c18",
+     "where": "term",
+     "title": "最簡單：讓終端機幫你開資料夾",
+     "desc": "先 cd 進要放檔案的資料夾，再打 explorer.exe .（最後那個點代表「目前這個資料夾」）。跳出來的檔案總管就是 WSL 裡面，把檔案拖進去就好。",
+     "blocks": [
+      {
+       "label": "",
+       "code": "cd ~/arm_ws/src/arm_description\nexplorer.exe ."
+      }
+     ],
+     "note": "這次就是用這招：arm.urdf 拖進 urdf 資料夾，5 個 STL 拖進 meshes 資料夾。"
+    },
+    {
+     "id": "c19",
+     "where": "exp",
+     "title": "從檔案總管走進去",
+     "desc": "貼到檔案總管最上面的網址列，按 Enter。檔案總管左邊那隻 Linux 企鵝點進去也是同一個地方。",
+     "blocks": [
+      {
+       "label": "",
+       "code": "\\\\wsl.localhost\\Ubuntu-24.04\\home\\rekis\\arm_ws\\src\\arm_description"
+      }
+     ],
+     "note": "這串不能貼進終端機，會出現 command not found。"
+    },
+    {
+     "id": "c20",
+     "where": "term",
+     "title": "用指令複製",
+     "desc": "Windows 的 D 槽在 WSL 裡叫 /mnt/d/，C 槽叫 /mnt/c/。",
+     "blocks": [
+      {
+       "label": "",
+       "code": "cp /mnt/d/專題/arm.urdf ~/arm_ws/src/arm_description/urdf/\ncp /mnt/d/專題/*.stl ~/arm_ws/src/arm_description/meshes/"
+      }
+     ],
+     "note": ""
+    },
+    {
+     "id": "c21",
+     "where": "term",
+     "title": "確認有放進去",
+     "desc": "資料夾名稱底下有列出檔案就成功了，空的代表還沒拖進去。",
+     "blocks": [
+      {
+       "label": "",
+       "code": "ls ~/arm_ws/src/arm_description/urdf ~/arm_ws/src/arm_description/meshes"
+      }
+     ],
+     "note": ""
+    },
+    {
+     "id": "c22",
+     "where": "term",
+     "title": "清掉多出來的 Zone.Identifier",
+     "desc": "從 Windows 拖進來，有時會多出「檔名:Zone.Identifier」的小檔案。無害，看了礙眼再刪。",
+     "blocks": [
+      {
+       "label": "",
+       "code": "find ~/arm_ws/src -name \"*:Zone.Identifier\" -delete"
+      }
+     ],
+     "note": ""
+    },
+    {
+     "id": "c23",
+     "where": "none",
+     "title": "分辨是哪一邊的路徑",
+     "desc": "反斜線 \\ 開頭的是 Windows 路徑，貼在檔案總管。\n斜線 / 開頭（或 ~）的是 Linux 路徑，貼在終端機。",
+     "blocks": [],
+     "note": ""
+    }
+   ]
+  },
+  {
+   "id": "rescue",
+   "title": "卡住時",
+   "ordered": false,
+   "intro": "改了東西沒反應、topic 不見、控制器叫不出來，先從這裡試。",
+   "cards": [
+    {
+     "id": "c24",
+     "where": "term",
+     "title": "清掉殭屍 Gazebo",
+     "desc": "舊的 Gazebo 沒關乾淨會在背景空轉，新的手臂被生到舊世界，控制器就永遠連不上。",
+     "blocks": [
+      {
+       "label": "查有沒有",
+       "code": "ps aux | grep \"gz sim\" | grep -v grep"
+      },
+      {
+       "label": "有就殺掉",
+       "code": "pkill -9 -f \"gz sim\""
+      }
+     ],
+     "note": "第一行什麼都沒印出來就是乾淨的。"
+    },
+    {
+     "id": "c25",
+     "where": "ps",
+     "title": "整個 WSL 重開",
+     "desc": "上面都沒用、或 node 重複一堆時的大絕招。跑完再重新打開 Ubuntu。",
+     "blocks": [
+      {
+       "label": "",
+       "code": "wsl --shutdown"
+      }
+     ],
+     "note": ""
+    },
+    {
+     "id": "c26",
+     "where": "term",
+     "title": "感測器 topic 不見了",
+     "desc": "兩行對照：Gazebo 有、ROS 沒有 → bridge 沒加；兩邊都沒有 → URDF 或 .gazebo 檔的問題。",
+     "blocks": [
+      {
+       "label": "問 Gazebo",
+       "code": "gz topic -l | grep camera"
+      },
+      {
+       "label": "問 ROS",
+       "code": "ros2 topic list | grep camera"
+      }
+     ],
+     "note": "把 camera 換成你要找的名字，例如 contact。"
+    },
+    {
+     "id": "c27",
+     "where": "term",
+     "title": "改完 URDF 先檢查",
+     "desc": "印出 URDF OK 才去重開 launch。",
+     "blocks": [
+      {
+       "label": "",
+       "code": "xacro ~/ros2_ws/src/Week-9-10-Simple-arm/bme_ros2_simple_arm/urdf/mogi_arm.xacro > /dev/null && echo \"URDF OK\""
+      }
+     ],
+     "note": ""
+    },
+    {
+     "id": "c28",
+     "where": "term",
+     "title": "看現在有哪些程式在跑",
+     "desc": "用來確認模擬有沒有開、有沒有重複開。",
+     "blocks": [
+      {
+       "label": "",
+       "code": "ros2 node list"
+      }
+     ],
+     "note": ""
+    }
+   ]
+  },
+  {
+   "id": "install",
+   "title": "裝過的套件（只要裝一次）",
+   "ordered": false,
+   "intro": "重灌或換電腦時照著補裝。",
+   "cards": [
+    {
+     "id": "c29",
+     "where": "term",
+     "title": "手臂控制器相關",
+     "desc": "少了這些，控制器會說 Loader not found，ros2 control 指令也不存在。",
+     "blocks": [
+      {
+       "label": "",
+       "code": "sudo apt install ros-jazzy-ros2-controllers ros-jazzy-ros2controlcli ros-jazzy-rqt-joint-trajectory-controller"
+      }
+     ],
+     "note": ""
+    },
+    {
+     "id": "c30",
+     "where": "term",
+     "title": "相機影像壓縮相關",
+     "desc": "Week 5-6 的 image transport 那章用到。",
+     "blocks": [
+      {
+       "label": "",
+       "code": "sudo apt install ros-jazzy-ros-gz-image ros-jazzy-compressed-image-transport ros-jazzy-topic-tools"
+      }
+     ],
+     "note": ""
+    }
+   ]
+  }
+ ]
+}</script><script id="app">
+(function(){
+  var SRC = JSON.parse(document.getElementById('data').textContent);
+  function clone(o){ return JSON.parse(JSON.stringify(o)); }
+  var state = clone(SRC);
+  var editing = false, dirty = false, query = '', readOnly = false, saving = false, msg = '';
+  var PLACES = [['term','Ubuntu 終端機','黑色的 Linux 視窗，開頭是 rekis@…$'],['ps','PowerShell','Windows 開始選單搜尋 PowerShell'],['exp','Windows 檔案總管','資料夾視窗最上面的網址列'],['file','VS Code 檔案','用 code 開的檔案，存檔 Ctrl+S'],['none','照著做','不用打指令']];
+  var FONT_LINK = '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap">';
+  var RESET = ':root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,-apple-system,sans-serif}img{max-width:100%}[hidden]{display:none!important}';
+  var top = document.getElementById('top');
+  var content = document.getElementById('content');
+  var barEl = document.getElementById('bar');
+  var uid = Date.now();
+  function newId(p){ return p + (uid++).toString(36); }
+  function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function placeName(k){ for (var i=0;i<PLACES.length;i++) if (PLACES[i][0]===k) return PLACES[i][1]; return PLACES[0][1]; }
+  function placeKey(k){ for (var i=0;i<PLACES.length;i++) if (PLACES[i][0]===k) return k; return 'term'; }
+  function today(){ var d=new Date(); function p(n){return (n<10?'0':'')+n;} return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate()); }
+
+  function matches(c){
+    if (!query) return true;
+    var hay = [c.title, c.desc, c.note].concat((c.blocks||[]).map(function(b){ return b.label+' '+b.code; })).join(' ').toLowerCase();
+    return hay.indexOf(query.toLowerCase()) !== -1;
+  }
+
+  function renderTop(){
+    top.innerHTML =
+      '<p class="eyebrow">機械手臂專題 · WSL2 Ubuntu 24.04 · ROS 2 Jazzy</p>' +
+      '<h1>機械手臂指令小抄</h1>' +
+      '<p class="lede">目前用過的指令，照「要做什麼」分好類。每張卡片右上角的顏色告訴你要貼到哪裡。用「複製」按鈕再貼上，就不會把 rekis@…$ 一起貼進去。</p>' +
+      '<div class="tools"><input id="q" type="search" placeholder="搜尋，例如 teleop、gz、explorer、手臂" aria-label="搜尋指令">' +
+      '<button id="edit-toggle" class="btn" type="button">編輯內容</button></div>' +
+      '<div class="legend">' + PLACES.map(function(p){ return '<span class="item"><span class="where w-'+p[0]+'">'+esc(p[1])+'</span>'+esc(p[2])+'</span>'; }).join('') + '</div>';
+    document.getElementById('q').addEventListener('input', function(e){ query = e.target.value.trim(); render(); });
+    document.getElementById('edit-toggle').addEventListener('click', function(){ editing = !editing; render(); });
+  }
+
+  function cardView(s, si, c, ci){
+    var step = s.ordered ? '<span class="step">'+(ci+1)+'</span>' : '';
+    var blocks = (c.blocks||[]).map(function(b, bi){
+      return '<div class="block">' + (b.label ? '<div class="block-label">'+esc(b.label)+'</div>' : '') +
+        '<div class="code-wrap"><pre><code>'+esc(b.code)+'</code></pre>' +
+        '<button class="copy" type="button" data-act="copy" data-s="'+si+'" data-c="'+ci+'" data-b="'+bi+'">複製</button></div></div>';
+    }).join('');
+    return '<article class="card">' +
+      '<div class="card-top">'+step+'<h3>'+esc(c.title)+'</h3><span class="where w-'+placeKey(c.where)+'">'+esc(placeName(c.where))+'</span></div>' +
+      (c.desc ? '<p class="desc">'+esc(c.desc)+'</p>' : '') + blocks +
+      (c.note ? '<p class="note"><b>提醒</b>'+esc(c.note)+'</p>' : '') + '</article>';
+  }
+
+  function cardEdit(s, si, c, ci){
+    var n = s.cards.length, id = esc(c.id);
+    var blocks = (c.blocks||[]).map(function(b, bi){
+      var rows = Math.min(10, Math.max(2, String(b.code).split('\n').length));
+      return '<fieldset class="ed-block"><legend>指令區塊 '+(bi+1)+'</legend>' +
+        '<input id="bl-'+id+'-'+bi+'" data-f="label" data-b="'+bi+'" value="'+esc(b.label)+'" placeholder="標籤，可空白（例如：終端機 1）" aria-label="區塊標籤">' +
+        '<textarea id="bc-'+id+'-'+bi+'" class="mono" data-f="code" data-b="'+bi+'" rows="'+rows+'" aria-label="指令內容" spellcheck="false">'+esc(b.code)+'</textarea>' +
+        '<button class="mini" type="button" data-act="del-block" data-b="'+bi+'">移除這個區塊</button></fieldset>';
+    }).join('');
+    return '<article class="card editing" data-s="'+si+'" data-c="'+ci+'">' +
+      '<div class="ed-row"><label for="w-'+id+'">貼到哪裡</label><select id="w-'+id+'" data-f="where">' +
+        PLACES.map(function(p){ return '<option value="'+p[0]+'"'+(p[0]===c.where?' selected':'')+'>'+esc(p[1])+'</option>'; }).join('') + '</select></div>' +
+      '<div class="ed-row"><label for="t-'+id+'">標題</label><input id="t-'+id+'" data-f="title" value="'+esc(c.title)+'"></div>' +
+      '<div class="ed-row"><label for="d-'+id+'">說明</label><textarea id="d-'+id+'" data-f="desc" rows="2">'+esc(c.desc)+'</textarea></div>' +
+      blocks +
+      '<button class="mini" type="button" data-act="add-block">＋ 加一個指令區塊</button>' +
+      '<div class="ed-row"><label for="n-'+id+'">提醒</label><textarea id="n-'+id+'" data-f="note" rows="2">'+esc(c.note)+'</textarea></div>' +
+      '<div class="ed-actions"><button class="mini" type="button" data-act="up"'+(ci===0?' disabled':'')+'>上移</button>' +
+      '<button class="mini" type="button" data-act="down"'+(ci===n-1?' disabled':'')+'>下移</button>' +
+      '<button class="mini danger" type="button" data-act="del-card">刪除這張卡片</button></div></article>';
+  }
+
+  function secHead(s, si){
+    if (!editing) {
+      return '<div class="sec-head"><h2>'+esc(s.title)+'</h2><span class="count">'+s.cards.length+' 張</span></div>' +
+        (s.intro ? '<p class="intro">'+esc(s.intro)+'</p>' : '');
+    }
+    var id = esc(s.id);
+    return '<div class="sec-edit" data-s="'+si+'">' +
+      '<div class="ed-row"><label for="st-'+id+'" style="font-size:12px;color:var(--muted);font-weight:700">分類名稱</label><input id="st-'+id+'" data-sf="title" value="'+esc(s.title)+'"></div>' +
+      '<div class="ed-row"><label for="si-'+id+'" style="font-size:12px;color:var(--muted);font-weight:700">分類說明</label><textarea id="si-'+id+'" data-sf="intro" rows="2">'+esc(s.intro)+'</textarea></div>' +
+      '<div class="row"><label><input type="checkbox" id="so-'+id+'" data-sf="ordered"'+(s.ordered?' checked':'')+'> 卡片有先後順序（顯示步驟編號）</label>' +
+      '<button class="mini danger" type="button" data-act="del-sec">刪除整個分類</button></div></div>';
+  }
+
+  function render(){
+    var q = document.getElementById('q');
+    if (q) q.disabled = editing;
+    var t = document.getElementById('edit-toggle');
+    if (t) { t.textContent = editing ? '完成編輯' : '編輯內容'; t.classList.toggle('on', editing); }
+    var html = '<nav class="toc" aria-label="分類">' + state.sections.map(function(s){ return '<a href="#'+esc(s.id)+'">'+esc(s.title)+'</a>'; }).join('') + '</nav>';
+    var shown = 0;
+    state.sections.forEach(function(s, si){
+      var list = [];
+      s.cards.forEach(function(c, ci){ if (editing || matches(c)) list.push([c, ci]); });
+      if (!editing && query && !list.length) return;
+      shown += list.length;
+      html += '<section class="sec" id="'+esc(s.id)+'">' + secHead(s, si) + '<div class="grid">' +
+        list.map(function(x){ return editing ? cardEdit(s, si, x[0], x[1]) : cardView(s, si, x[0], x[1]); }).join('') +
+        (editing ? '<button class="add-card" type="button" data-act="add-card" data-s="'+si+'">＋ 在「'+esc(s.title)+'」新增一張卡片</button>' : '') +
+        '</div></section>';
+    });
+    if (!editing && query && !shown) html += '<p class="empty">找不到「'+esc(query)+'」。試試指令裡的英文字，例如 launch、teleop、gz。</p>';
+    if (editing) html += '<button class="add-sec" type="button" data-act="add-sec">＋ 新增一個分類</button>';
+    html += '<footer class="foot">最後更新 '+esc(state.updated)+'</footer>';
+    content.innerHTML = html;
+    renderBar();
+  }
+
+  function renderBar(){
+    if (!editing && !dirty && !msg) { barEl.hidden = true; return; }
+    barEl.hidden = false;
+    var text = msg || (dirty ? '有還沒儲存的修改。' : '編輯模式：直接改欄位，改完按「儲存到網站」。');
+    barEl.innerHTML = '<span class="msg">'+esc(text)+'</span><div class="acts">' +
+      (stashed() ? '<button type="button" data-act="restore">還原上次沒存到的修改</button>' : '') +
+      '<button type="button" data-act="discard"'+(dirty && !saving ? '' : ' disabled')+'>放棄修改</button>' +
+      '<button type="button" class="primary" data-act="save"'+(dirty && !saving && !readOnly ? '' : ' disabled')+'>'+(saving?'儲存中…':'儲存到網站')+'</button></div>';
+  }
+
+  function markDirty(){ if (!dirty) { dirty = true; msg = ''; renderBar(); } }
+
+  function stashed(){ try { return !!sessionStorage.getItem('cmd-draft'); } catch(e){ return false; } }
+
+  function buildDoc(){
+    var next = clone(state); next.updated = today();
+    var json = JSON.stringify(next, null, 1).replace(/</g, '\\u003c');
+    var S = '<' + '/script>';
+    return '<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>' + RESET + '</style></head><body>' +
+      '<title>機械手臂指令小抄</title>' + FONT_LINK +
+      '<style id="page-css">' + document.getElementById('page-css').textContent + '</style>' +
+      '<div class="wrap"><header class="top" id="top"></header><main id="content" class="wrap-inner" style="display:flex;flex-direction:column;gap:44px"></main></div><div id="bar" hidden></div>' +
+      '<script type="application/json" id="data">' + json + S +
+      '<script id="app">' + document.getElementById('app').textContent + S +
+      '</body></html>';
+  }
+
+  async function save(){
+    if (!dirty || saving || readOnly) return;
+    saving = true; msg = '儲存中…'; renderBar();
+    var art = null;
+    try { art = (window.claude && window.claude.use) ? await window.claude.use('artifact') : null; } catch(e){ art = null; }
+    if (!art) { saving = false; msg = '這個畫面沒辦法儲存。請在 claude.ai 打開這個網站再按儲存。'; renderBar(); return; }
+    try {
+      await art.publish(buildDoc());
+      try { sessionStorage.removeItem('cmd-draft'); } catch(e){}
+      dirty = false; msg = '已儲存，頁面會自動重新載入。';
+    } catch(err){
+      var code = err && err.code;
+      if (code === 'conflict') {
+        try { sessionStorage.setItem('cmd-draft', JSON.stringify(state)); } catch(e){}
+        msg = '剛剛有人（或 Claude）先更新了網站，頁面會載入最新版。重新載入後按「還原上次沒存到的修改」。';
+      } else if (['not_writer','not_granted','consent_required','not_declared','capability_disabled','capability_removed'].indexOf(code) !== -1) {
+        readOnly = true; msg = '這是唯讀檢視，只有網站擁有者能儲存。';
+      } else if (code === 'rate_limited') {
+        msg = '存得太頻繁了，等一分鐘再按儲存。';
+      } else if (code === 'too_large') {
+        msg = '內容太大存不下，刪掉一些卡片再試。';
+      } else {
+        msg = '儲存失敗（' + (code || '未知原因') + '），稍後再按一次。';
+      }
+    }
+    saving = false; renderBar();
+  }
+
+  function cardOf(el){
+    var a = el.closest('.card[data-c]');
+    if (!a) return null;
+    return { s: +a.dataset.s, c: +a.dataset.c, card: state.sections[+a.dataset.s].cards[+a.dataset.c] };
+  }
+
+  function onField(e){
+    var t = e.target;
+    if (t.dataset.sf) {
+      var s = state.sections[+t.closest('.sec-edit').dataset.s];
+      s[t.dataset.sf] = t.type === 'checkbox' ? t.checked : t.value;
+      markDirty(); return;
+    }
+    if (t.dataset.f) {
+      var ref = cardOf(t); if (!ref) return;
+      if (t.dataset.b != null) ref.card.blocks[+t.dataset.b][t.dataset.f] = t.value;
+      else ref.card[t.dataset.f] = t.value;
+      markDirty();
+    }
+  }
+  content.addEventListener('input', onField);
+  content.addEventListener('change', onField);
+
+  function arm(btn, label){
+    if (btn.dataset.armed === '1') return true;
+    btn.dataset.armed = '1'; btn.classList.add('armed');
+    var old = btn.textContent; btn.textContent = label;
+    setTimeout(function(){ if (btn.isConnected) { btn.dataset.armed = ''; btn.classList.remove('armed'); btn.textContent = old; } }, 4000);
+    return false;
+  }
+
+  content.addEventListener('click', function(e){
+    var btn = e.target.closest('[data-act]'); if (!btn) return;
+    var act = btn.dataset.act, ref;
+    if (act === 'copy') {
+      var code = state.sections[+btn.dataset.s].cards[+btn.dataset.c].blocks[+btn.dataset.b].code;
+      var done = function(){ btn.textContent = '已複製'; btn.classList.add('done'); setTimeout(function(){ btn.textContent = '複製'; btn.classList.remove('done'); }, 1500); };
+      var fallback = function(){ var pre = btn.parentNode.querySelector('pre'); var r = document.createRange(); r.selectNodeContents(pre); var sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); btn.textContent = '已選取，按 Ctrl+C'; };
+      try { navigator.clipboard.writeText(code).then(done, fallback); } catch(err){ fallback(); }
+      return;
+    }
+    if (act === 'add-card') {
+      var sec = state.sections[+btn.dataset.s];
+      var nc = { id: newId('c'), where: 'term', title: '新的指令', desc: '', blocks: [{ label: '', code: '' }], note: '' };
+      sec.cards.push(nc); markDirty(); render();
+      var el = document.getElementById('t-' + nc.id); if (el) { el.focus(); el.select(); }
+      return;
+    }
+    if (act === 'add-sec') {
+      var ns = { id: newId('s'), title: '新的分類', intro: '', ordered: false, cards: [] };
+      state.sections.push(ns); markDirty(); render();
+      var se = document.getElementById('st-' + ns.id); if (se) { se.focus(); se.select(); }
+      return;
+    }
+    if (act === 'del-sec') {
+      if (!arm(btn, '再按一次，整個分類會刪掉')) return;
+      state.sections.splice(+btn.closest('.sec-edit').dataset.s, 1); markDirty(); render(); return;
+    }
+    ref = cardOf(btn); if (!ref) return;
+    var cards = state.sections[ref.s].cards;
+    if (act === 'add-block') { ref.card.blocks.push({ label: '', code: '' }); }
+    else if (act === 'del-block') { ref.card.blocks.splice(+btn.dataset.b, 1); }
+    else if (act === 'up' && ref.c > 0) { cards.splice(ref.c - 1, 0, cards.splice(ref.c, 1)[0]); }
+    else if (act === 'down' && ref.c < cards.length - 1) { cards.splice(ref.c + 1, 0, cards.splice(ref.c, 1)[0]); }
+    else if (act === 'del-card') { if (!arm(btn, '再按一次確定刪除')) return; cards.splice(ref.c, 1); }
+    else return;
+    markDirty(); render();
+  });
+
+  barEl.addEventListener('click', function(e){
+    var btn = e.target.closest('[data-act]'); if (!btn) return;
+    if (btn.dataset.act === 'save') save();
+    else if (btn.dataset.act === 'discard') { state = clone(SRC); dirty = false; msg = ''; render(); }
+    else if (btn.dataset.act === 'restore') {
+      try { var d = JSON.parse(sessionStorage.getItem('cmd-draft')); sessionStorage.removeItem('cmd-draft'); if (d && d.sections) { state = d; editing = true; dirty = true; msg = '已還原你的修改，記得再按一次儲存。'; } } catch(err){}
+      render();
+    }
+  });
+
+  renderTop();
+  render();
+})();
+</script>
+
+</body>
+</html>
