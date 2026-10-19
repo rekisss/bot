@@ -9,6 +9,14 @@ ROS 2 Jazzy / Gazebo Harmonic / MoveIt 專題的複習網站：
 
 **網站**：https://rekisss.github.io/bot/
 
+## 專題文件
+
+| 文件 | 內容 |
+| --- | --- |
+| [學習整理](docs/notes.md) | ROS 2、URDF/TF、Gazebo 感測器、ros2_control、逆運動學、MoveIt、CAD 轉 URDF、AI 訓練路線、除錯方法的觀念筆記 |
+| [學習歷程](docs/portfolio.md) | 從環境建置到 pick & place 的時間軸、遇到的困難、反思與能力成長 |
+| [專題論文（期中草稿）](docs/thesis.md) | 摘要、系統架構、研究方法、目前實驗結果、討論與未來工作 |
+
 ## 怎麼改內容
 
 所有內容都在 `index.html` 裡 `<script type="application/json" id="data">` 那一段，一張卡片長這樣：
