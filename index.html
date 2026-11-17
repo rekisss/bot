@@ -117,8 +117,270 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 <div class="wrap"><header class="top" id="top"></header><main id="content" class="wrap-inner" style="display:flex;flex-direction:column;gap:44px"></main></div><div id="bar" hidden></div><script type="application/json" id="data">{
- "updated": "2026-10-13",
+ "updated": "2026-11-17",
  "sections": [
+  {
+   "id": "quick",
+   "group": "快速啟動",
+   "title": "⭐ 快速啟動（最常開的都在這）",
+   "ordered": false,
+   "intro": "要開 Gazebo、RViz、MoveIt 或自己的手臂，直接從這裡複製。每個終端機都要先做「每次開工」那三行（已寫進 ~/.bashrc 就會自動做）。",
+   "cards": [
+    {
+     "id": "q1",
+     "where": "term",
+     "title": "自己的手臂 r005_arm：Gazebo 雙臂",
+     "desc": "一次開 Gazebo + RViz，生出兩支 r005 手臂（/arm_a、/arm_b），各有自己的控制器。",
+     "blocks": [
+      {
+       "label": "終端機 A：開模擬（之後不要動它）",
+       "code": "pkill -9 -f \"gz sim\"\ncd ~/ros2_ws && colcon build --packages-select r005_arm && source install/setup.bash\nros2 launch r005_arm two_arms.launch.py"
+      },
+      {
+       "label": "終端機 B：確認控制器都是 active",
+       "code": "ros2 control list_controllers -c /arm_a/controller_manager\nros2 control list_controllers -c /arm_b/controller_manager"
+      },
+      {
+       "label": "終端機 C：讓兩支手臂跳舞",
+       "code": "python3 ~/ros2_ws/src/r005_arm/scripts/dance_gz.py"
+      }
+     ],
+     "note": "兩支手臂在命名空間裡，所以查控制器一定要加 -c /arm_a/controller_manager；不加會一直卡在 waiting for service。"
+    },
+    {
+     "id": "q2",
+     "where": "term",
+     "title": "自己的手臂 r005_arm：只在 RViz 看（拉滑桿）",
+     "desc": "不用物理、不用控制器，最快看模型和關節轉軸對不對。",
+     "blocks": [
+      {
+       "label": "",
+       "code": "ros2 launch urdf_tutorial display.launch.py model:=$HOME/ros2_ws/install/r005_arm/share/r005_arm/urdf/r005_arm.urdf"
+      }
+     ],
+     "note": "改完 URDF 要先 colcon build --packages-select r005_arm，因為讀的是 install/ 裡那份。"
+    },
+    {
+     "id": "q3",
+     "where": "term",
+     "title": "自己的手臂 r005_arm：在 RViz 自己跳舞（dance.py）",
+     "desc": "由 dance.py 取代滑桿來發 /joint_states。開之前先關掉上面那個有滑桿的 RViz。",
+     "blocks": [
+      {
+       "label": "終端機 A：算零件位置",
+       "code": "ros2 run robot_state_publisher robot_state_publisher --ros-args -p robot_description:=\"$(cat ~/ros2_ws/install/r005_arm/share/r005_arm/urdf/r005_arm.urdf)\""
+      },
+      {
+       "label": "終端機 B：RViz",
+       "code": "rviz2"
+      },
+      {
+       "label": "終端機 C：跳舞",
+       "code": "python3 ~/ros2_ws/src/r005_arm/scripts/dance.py"
+      }
+     ],
+     "note": "RViz 裡要設三個地方：Fixed Frame 打 base_link → Add 加 RobotModel → Description Topic 選 /robot_description。"
+    },
+    {
+     "id": "q4",
+     "where": "term",
+     "title": "教材手臂：一鍵開 Gazebo + MoveIt + RViz",
+     "desc": "start_all.launch.py 會先開 Gazebo，等 5 秒再開 move_group 和 RViz，use_sim_time 也幫你設好了。",
+     "blocks": [
+      {
+       "label": "終端機 1（綽號 armstart）",
+       "code": "ros2 launch bme_ros2_simple_arm_moveit_config start_all.launch.py"
+      },
+      {
+       "label": "終端機 2：自己的程式，可以一直重跑",
+       "code": "ros2 launch bme_ros2_simple_arm_moveit_config moveit_py_demo.launch.py"
+      },
+      {
+       "label": "終端機 2：夾取放置（綽號 armpick）",
+       "code": "ros2 launch bme_ros2_simple_arm_moveit_config pick_place.launch.py"
+      }
+     ],
+     "note": "RViz 按 Plan 一直 Failed，通常是 move_group 沒在跑：ros2 node list 看有沒有 /move_group。"
+    },
+    {
+     "id": "q5",
+     "where": "term",
+     "title": "教材手臂：只開 Gazebo + 拉滑桿",
+     "desc": "不用 MoveIt，直接用 rqt 的關節控制面板推手臂。",
+     "blocks": [
+      {
+       "label": "終端機 1",
+       "code": "ros2 launch bme_ros2_simple_arm spawn_robot.launch.py"
+      },
+      {
+       "label": "終端機 2",
+       "code": "ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller --force-discover"
+      }
+     ],
+     "note": "面板裡選 /controller_manager → arm_controller → 按紅色電源鈕變綠，再拉滑桿。"
+    },
+    {
+     "id": "q6",
+     "where": "term",
+     "title": "小車：Gazebo + RViz",
+     "desc": "Week 5-6 的車子，相機、IMU、追紅球都在這。",
+     "blocks": [
+      {
+       "label": "終端機 1",
+       "code": "ros2 launch bme_gazebo_sensors spawn_robot.launch.py"
+      },
+      {
+       "label": "終端機 2：自動追紅球",
+       "code": "ros2 run bme_gazebo_sensors_py chase_the_ball"
+      }
+     ],
+     "note": "鍵盤開車和追紅球一次只開一個，兩個同時發 /cmd_vel 車子會抽搐。"
+    },
+    {
+     "id": "q7",
+     "where": "term",
+     "title": "MoveIt 官方示範（Panda）",
+     "desc": "不用自己的檔案，用來練習 RViz 的 Plan / Execute。",
+     "blocks": [
+      {
+       "label": "",
+       "code": "ros2 launch moveit_resources_panda_moveit_config demo.launch.py"
+      }
+     ],
+     "note": ""
+    },
+    {
+     "id": "q8",
+     "where": "term",
+     "title": "關掉、清乾淨",
+     "desc": "要換開另一個模擬前做這步，避免殭屍 Gazebo 讓新手臂生到舊世界。",
+     "blocks": [
+      {
+       "label": "Ubuntu 終端機",
+       "code": "pkill -9 -f \"gz sim\"; pkill -f robot_state_publisher; pkill -f dance\nros2 node list"
+      },
+      {
+       "label": "還是怪怪的：PowerShell 整個 WSL 重開",
+       "code": "wsl --shutdown"
+      }
+     ],
+     "note": "ros2 node list 什麼都沒印才算乾淨。"
+    }
+   ]
+  },
+  {
+   "id": "keyfiles",
+   "group": "快速啟動",
+   "title": "重要檔案在哪",
+   "ordered": false,
+   "intro": "要改東西時先來這裡找路徑。全部都在 WSL 的 ~/ros2_ws/src 裡（Windows 檔案總管：\\\\wsl.localhost\\Ubuntu-24.04\\home\\rekis\\ros2_ws\\src）。",
+   "cards": [
+    {
+     "id": "k1",
+     "where": "none",
+     "title": "自己的手臂 r005_arm",
+     "desc": "專題主角。6 個旋轉關節（joint1～joint6），SolidWorks 轉出來的。",
+     "blocks": [
+      {
+       "label": "",
+       "code": "~/ros2_ws/src/r005_arm/\n├── urdf/r005_arm.urdf          ★ 手臂設計圖：link、joint、limit、ros2_control、Gazebo 外掛\n├── meshes/*.stl                  零件外觀\n├── config/controllers.yaml     ★ 控制器設定（給 Gazebo 版用）\n├── launch/two_arms.launch.py   ★ 開 Gazebo 雙臂\n├── scripts/dance.py              RViz 版跳舞（發 /joint_states）\n├── scripts/dance_gz.py           Gazebo 版跳舞（發 /arm_a/arm_controller/commands）\n├── CMakeLists.txt\n└── package.xml"
+      }
+     ],
+     "note": "~/arm_description 和 ~/arm_ws 是舊的空殼，不用管；真正在用的是 ~/ros2_ws/src/r005_arm。"
+    },
+    {
+     "id": "k2",
+     "where": "none",
+     "title": "教材手臂（MOGI Week 9-10）",
+     "desc": "MoveIt、IK、pick & place 都在這兩個套件。",
+     "blocks": [
+      {
+       "label": "",
+       "code": "~/ros2_ws/src/Week-9-10-Simple-arm/\n├── bme_ros2_simple_arm/                手臂本體\n│   ├── urdf/mogi_arm.xacro           ★ 手臂設計圖＋接觸感測器\n│   ├── urdf/mogi_arm.gazebo            Gazebo 外掛\n│   ├── config/controller_position.yaml 控制器\n│   ├── config/gz_bridge.yaml           Gazebo ↔ ROS 翻譯表\n│   └── launch/spawn_robot.launch.py    只開 Gazebo\n└── bme_ros2_simple_arm_moveit_config/  MoveIt 設定（Setup Assistant 產生）\n    └── launch/\n        ├── start_all.launch.py       ★ Gazebo + move_group + RViz\n        ├── moveit_py_demo.launch.py    跑自己的 moveit_py 程式\n        └── pick_place.launch.py        夾取放置"
+      },
+      {
+       "label": "找不到某支 Python 程式在哪時",
+       "code": "find ~/ros2_ws/src -name \"pick_place.py\""
+      }
+     ],
+     "note": ""
+    },
+    {
+     "id": "k3",
+     "where": "file",
+     "title": "~/.bashrc 裡的綽號",
+     "desc": "每個新終端機會自動 source，並多出這些捷徑。用 code ~/.bashrc 打開。",
+     "blocks": [
+      {
+       "label": "",
+       "code": "rb        = cd ~/ros2_ws && colcon build --symlink-install && source install/setup.bash\nws        = cd ~/ros2_ws/src/Week-9-10-Simple-arm\narmstart  = 開教材手臂 Gazebo + MoveIt + RViz\narmpick   = 跑 pick & place\nnodes     = ros2 node list"
+      },
+      {
+       "label": "想幫 r005 也加一個（自己貼進 .bashrc 最下面）",
+       "code": "alias r005='pkill -9 -f \"gz sim\"; ros2 launch r005_arm two_arms.launch.py'"
+      }
+     ],
+     "note": "改完 .bashrc 要 Ctrl+S 存檔，再 source ~/.bashrc 才會生效。"
+    }
+   ]
+  },
+  {
+   "id": "heads-up",
+   "group": "快速啟動",
+   "title": "開之前要注意",
+   "ordered": false,
+   "intro": "這些都是之前真的踩過的坑。",
+   "cards": [
+    {
+     "id": "n1",
+     "where": "none",
+     "title": "一次只開一個模擬",
+     "desc": "教材手臂、r005、小車不要同時開。兩個 Gazebo 會互搶，新的手臂常常被生到舊世界，控制器永遠連不上。換之前先跑「關掉、清乾淨」。",
+     "blocks": [],
+     "note": ""
+    },
+    {
+     "id": "n2",
+     "where": "none",
+     "title": "/joint_states 只能有一個人發",
+     "desc": "滑桿 RViz（joint_state_publisher）和 dance.py 同時開，手臂會閃一下閃一下。用 ros2 topic info /joint_states -v 看 Publisher count 要是 1。",
+     "blocks": [],
+     "note": ""
+    },
+    {
+     "id": "n3",
+     "where": "none",
+     "title": "r005 雙臂的 robot_state_publisher 重複了",
+     "desc": "ros2 node list 看到 /arm_a/robot_state_publisher 出現兩次（還沒修）。現在不影響跳舞，但接 MoveIt 前要回 two_arms.launch.py 找出重複啟動的那一個 Node(...)，不然 TF 會亂跳。",
+     "blocks": [],
+     "note": ""
+    },
+    {
+     "id": "n4",
+     "where": "none",
+     "title": "改了什麼要做什麼",
+     "desc": "改 URDF / launch / yaml 內容 → Ctrl+C 關掉 launch 再重開。\n新增檔案、改 setup.py 或 CMakeLists.txt → 先 colcon build 再重開。\nr005_arm 沒用 --symlink-install 時，改 URDF 也要 build。",
+     "blocks": [],
+     "note": ""
+    },
+    {
+     "id": "n5",
+     "where": "none",
+     "title": "跑 ROS 前先 conda deactivate",
+     "desc": "LeRobot 用的 conda 環境會蓋掉 ROS 的 Python，症狀是莫名其妙找不到套件。終端機前面出現 (base) 或 (lerobot) 就先 conda deactivate。",
+     "blocks": [],
+     "note": ""
+    },
+    {
+     "id": "n6",
+     "where": "none",
+     "title": "Gazebo 很卡時",
+     "desc": "~/.bashrc 最後有一行 export LIBGL_ALWAYS_SOFTWARE=1，它會叫 Gazebo 用 CPU 畫圖。能跑就先不動；很卡的話在那行前面加 # 停用，改用顯示卡（d3d12）試試。同時把遊戲關掉。",
+     "blocks": [],
+     "note": ""
+    }
+   ]
+  },
   {
    "id": "start",
    "title": "每次開工",
@@ -360,9 +622,9 @@ html{scroll-behavior:smooth}
   },
   {
    "id": "myarm",
-   "title": "自己的手臂（arm_description）",
+   "title": "自己的手臂（r005_arm）",
    "ordered": false,
-   "intro": "從 SolidWorks 轉出來的模型，放在 ~/arm_ws。",
+   "intro": "專題手臂在 ~/ros2_ws/src/r005_arm。啟動指令都整理在最上面的「快速啟動」。",
    "cards": [
     {
      "id": "c17",
@@ -372,10 +634,10 @@ html{scroll-behavior:smooth}
      "blocks": [
       {
        "label": "",
-       "code": "cd ~/arm_ws\ncolcon build --symlink-install\nsource install/setup.bash\nros2 launch urdf_tutorial display.launch.py model:=$(ros2 pkg prefix arm_description)/share/arm_description/urdf/arm.urdf"
+       "code": "cd ~/ros2_ws\ncolcon build --packages-select r005_arm\nsource install/setup.bash\nros2 launch urdf_tutorial display.launch.py model:=$HOME/ros2_ws/install/r005_arm/share/r005_arm/urdf/r005_arm.urdf"
       }
      ],
-     "note": ""
+     "note": "舊的 arm_description 已經不用了。"
     }
    ],
    "group": "指令"
@@ -589,12 +851,12 @@ html{scroll-behavior:smooth}
     {
      "id": "c31",
      "where": "none",
-     "title": "兩個工作區長怎樣",
+     "title": "工作區長怎樣",
      "desc": "工作區（workspace）= 一個大資料夾，裡面的 src/ 放很多套件。colcon build 會把 src/ 編譯進 install/，ros2 launch 和 ros2 run 讀的是 install/ 裡的東西。",
      "blocks": [
       {
        "label": "",
-       "code": "~/ros2_ws/                        ← 練習用工作區（MOGI 課程）\n├── src/                          ← 原始碼都在這，你只會改這裡\n│   ├── Week-5-6-Gazebo-sensors/\n│   │   ├── bme_gazebo_sensors/       ← 車子：模型、世界、launch\n│   │   └── bme_gazebo_sensors_py/    ← 車子的 Python 程式（追紅球）\n│   ├── Week-9-10-Simple-arm/\n│   │   └── bme_ros2_simple_arm/      ← 手臂：模型、控制器、launch\n│   └── mogi_trajectory_server/       ← 畫軌跡的小工具\n├── build/      ← colcon build 自動產生，不用管\n├── install/    ← colcon build 自動產生，source 的就是它\n└── log/        ← 編譯紀錄\n\n~/arm_ws/                         ← 專題自己的工作區\n└── src/\n    └── arm_description/          ← SolidWorks 轉出來的手臂\n        ├── urdf/arm.urdf\n        ├── meshes/*.stl\n        └── CMakeLists.txt"
+       "code": "~/ros2_ws/                        ← 練習用工作區（MOGI 課程）\n├── src/                          ← 原始碼都在這，你只會改這裡\n│   ├── Week-5-6-Gazebo-sensors/\n│   │   ├── bme_gazebo_sensors/       ← 車子：模型、世界、launch\n│   │   └── bme_gazebo_sensors_py/    ← 車子的 Python 程式（追紅球）\n│   ├── Week-9-10-Simple-arm/\n│   │   └── bme_ros2_simple_arm/      ← 手臂：模型、控制器、launch\n│   ├── mogi_trajectory_server/       ← 畫軌跡的小工具\n│   └── r005_arm/                     ← ★ 專題自己的手臂（SolidWorks 轉出來）\n├── build/      ← colcon build 自動產生，不用管\n├── install/    ← colcon build 自動產生，source 的就是它\n└── log/        ← 編譯紀錄\n\n~/arm_ws/、~/arm_description/       ← 舊的空殼，現在不用"
       }
      ],
      "note": "build/、install/、log/ 壞掉可以整個刪掉再 colcon build，不會弄壞你的程式。src/ 千萬不要亂刪。"

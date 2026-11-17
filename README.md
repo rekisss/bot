@@ -9,6 +9,8 @@ ROS 2 Jazzy / Gazebo Harmonic / MoveIt 專題的複習網站：
 
 **網站**：https://rekisss.github.io/bot/
 
+> 要開模擬？網站最上面的 **⭐ 快速啟動** 有：r005_arm 雙臂 Gazebo、RViz 看模型、教材手臂 MoveIt 一鍵啟動、小車、清殭屍 Gazebo；下面接著是「重要檔案在哪」和「開之前要注意」。
+
 ## 專題文件
 
 | 文件 | 內容 |
